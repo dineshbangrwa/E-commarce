@@ -162,44 +162,26 @@
 <script src="{{ asset('front/js/form-validator.min.js') }}?v={{ time() }}"></script>
 <script src="{{ asset('front/js/contact-form-script.js') }}?v={{ time() }}"></script>
 <script src="{{ asset('front/js/custom.js') }}?v={{ time() }}"></script>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
-    $(document).on('change', '.update-qty', function() {
-        let itemId = $(this).data('id');
-        let qty = $(this).val();
-
-        $.ajax({
-            url: '/cart/update-ajax/' + itemId,
-            method: 'PUT',
-            data: {
-                quantity: qty,
-                _token: '{{ csrf_token() }}'
-            },
-            success: function(response) {
-                if (response.success) {
-
-                    $('#total-' + itemId).text('₹' + response.updated_total);
-
-                    location.reload();
-                } else {
-                    alert(response.message || 'Update failed');
-                }
-            },
-            error: function(xhr) {
-                alert('Error updating quantity');
-            }
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).on('change', '.update-qty', function() {
+            let itemId = $(this).data('id');
+            let qty = $(this).val();
+            $.ajax({
+                url: '/cart/update-ajax/' + itemId,
+                method: 'PUT',
+                data: { quantity: qty, _token: '{{ csrf_token() }}' },
+                success: function(response) {
+                    if (response.success) {
+                        $('#total-' + itemId).text('₹' + response.updated_total);
+                        location.reload();
+                    } else {
+                        alert(response.message || 'Update failed');
+                    }
+                },
+                error: function() { alert('Error updating quantity'); }
+            });
         });
-    });
-</script>
-
-{{-- <script>
-    document.getElementById('search-icon').addEventListener('click', function() {
-        const box = document.getElementById('search-form-container');
-        box.style.display = (box.style.display === 'none' || box.style.display === '') ? 'block' : 'none';
-    });
-</script> --}}
-
-
+    </script>
 </body>
-
 </html>

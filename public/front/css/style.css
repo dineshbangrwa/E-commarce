@@ -1080,6 +1080,9 @@ ul.cart-list>li.total>.btn:hover {
     font-size: 16px;
     font-weight: 700;
     padding-bottom: 15px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis; 
 }
 
 .why-text h5 {

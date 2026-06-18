@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('quotes', function (Blueprint $table) {
             $table->id();
-               $table->string('cart_id');
+            $table->string('cart_id');
             $table->integer('user_id');
             $table->string('name')->nullable();
             $table->string('email')->nullable();;

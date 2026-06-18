@@ -3,476 +3,160 @@
     $meta_description = $product->meta_description ?? Str::limit(strip_tags($product->description), 160);
     $meta_keywords = $product->meta_tag ?? 'product, zopify, ' . $product->name;
 @endphp
+@extends('layouts.app')
 
-@include('includes.header')
-
-<style>
-    .single-product-slider .carousel-item img,
-    .carousel-indicators img {
-        height: 450px;
-        object-fit: cover;
-        object-position: center;
-    }
-
-    .carousel-indicators li img {
-        height: 80px;
-        width: 80px;
-        object-fit: cover;
-        border-radius: 5px;
-    }
-
-    @media (max-width: 768px) {
-        .single-product-slider .carousel-item img {
-            height: 300px;
-        }
-    }
-
-    .variant-box {
-        border: 2px solid #e0e0e0;
-        border-radius: 8px;
-        padding: 10px;
-        background-color: #fff;
-        text-align: center;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        min-height: 100px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .variant-box:hover {
-        border-color: #007bff;
-        box-shadow: 0 5px 15px rgba(0, 123, 255, 0.3);
-        transform: translateY(-3px);
-    }
-
-    .variant-box.selected {
-        border-color: #007bff;
-        background-color: #f8f9fa;
-        box-shadow: 0 5px 15px rgba(0, 123, 255, 0.4);
-    }
-
-    .variant-content {
-        font-size: 12px;
-    }
-
-    .variant-details {
-        margin-bottom: 5px;
-        font-size: 13px;
-    }
-
-    .attribute-name {
-        font-weight: 600;
-        color: #333;
-    }
-
-    .attribute-value {
-        color: #555;
-        margin-left: 5px;
-    }
-
-    .special-price {
-        color: #e74c3c;
-        font-weight: bold;
-        font-size: 15px;
-    }
-
-    .original-price {
-        font-size: 12px;
-        margin-left: 6px;
-    }
-
-    .products-single .box-img-hover img {
-        height: 250px;
-        object-fit: scale-down;
-        width: 100%;
-    }
-
-    .star-rating-wrap {
-        display: inline-block;
-        direction: ltr;
-    }
-
-    .star {
-        font-size: 2rem;
-        color: #ccc;
-        cursor: pointer;
-        transition: color 0.2s;
-        margin-right: 3px;
-    }
-
-    .star.selected,
-    .star.hovered {
-        color: #ffb300;
-    }
-</style>
-
+@section('content')
 @php
-    $rate = session('currency_rate', 1);
     $symbol = session('currency_symbol', '₹');
+    $rate = session('currency_rate', 1);
     $langCode = session('language_code', app()->getLocale());
+    $now = \Carbon\Carbon::now();
+    $hasSpecialPrice = $product->special_price && $product->special_price_from && $product->special_price_to && $now->between($product->special_price_from, $product->special_price_to);
+    if ($hasSpecialPrice) {
+        $discount = (($product->price - $product->special_price) / $product->price) * 100;
+    }
+    $images = $product->getMedia('image');
 @endphp
 
-<div class="shop-detail-box-main">
-    <div class="container">
-        <div class="row">
-            @php
-                $mainImage = $product->getFirstMediaUrl('image');
-                $bannerImages = $product->getMedia('banner_image');
-                $attributes =
-                    $attributes ?? \App\Models\Attribute::where('product_id', $product->id)->with('values')->get();
-                $attributeCombinations =
-                    $attributeCombinations ??
-                    \App\Models\AttributeCombination::where('product_id', $product->id)->get();
-            @endphp
+<div class="pt-24 pb-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center gap-2 text-sm text-[#9CA3AF] mb-6">
+            <a href="{{ route('lang.index', ['lang' => $langCode]) }}" class="hover:text-[#8B5CF6] transition-colors">{{ __('buttons.home') }}</a>
+            <i class="fas fa-chevron-right text-[10px]"></i>
+            @if ($product->category)
+                <a href="{{ route('category', ['lang' => $langCode, 'url_key' => $product->category->url_key]) }}" class="hover:text-[#8B5CF6] transition-colors">{{ $product->category->name }}</a>
+                <i class="fas fa-chevron-right text-[10px]"></i>
+            @endif
+            <span class="text-[#F1F1F6]">{{ $product->name }}</span>
+        </div>
 
-            <div class="col-xl-5 col-lg-5 col-md-6">
-                <div id="carousel-example-1" class="single-product-slider carousel slide" data-ride="carousel">
-                    <div class="carousel-inner" role="listbox">
-                        <div class="carousel-item active">
-                            <img class="d-block w-100" src="{{ $mainImage }}" loading="lazy"
-                                alt="{{ $product->name }}">
-                        </div>
-                        @foreach ($bannerImages as $index => $bannerImage)
-                            <div class="carousel-item">
-                                <img class="d-block w-100" src="{{ $bannerImage->getUrl() }}" loading="lazy"
-                                    alt="{{ $product->name }} Banner {{ $index + 1 }}">
-                            </div>
-                        @endforeach
-                    </div>
-                    @if ($bannerImages->isNotEmpty())
-                        <a class="carousel-control-prev" href="#carousel-example-1" role="button" data-slide="prev">
-                            <i class="fa fa-angle-left" aria-hidden="true"></i>
-                            <span class="sr-only">Previous</span>
-                        </a>
-                        <a class="carousel-control-next" href="#carousel-example-1" role="button" data-slide="next">
-                            <i class="fa fa-angle-right" aria-hidden="true"></i>
-                            <span class="sr-only">Next</span>
-                        </a>
-                    @endif
-                    <ol class="carousel-indicators">
-                        @foreach ($bannerImages as $index => $bannerImage)
-                            <li data-target="#carousel-example-1" data-slide-to="{{ $index + 1 }}">
-                                <img class="d-block w-100 img-fluid" src="{{ $bannerImage->getUrl() }}"
-                                    alt="{{ $product->name }} Banner {{ $index + 1 }}">
-                            </li>
-                        @endforeach
-                    </ol>
-                </div>
-            </div>
-
-            <div class="col-xl-7 col-lg-7 col-md-6">
-                <div class="single-product-details">
-                    <a class="cart"
-                        href="{{ route('product', ['lang' => session('language_code', app()->getLocale()), 'url_key' => $product->url_key]) }}">
-                        <h2>{{ $product->name }}</h2>
-                    </a>
-
-                    <div id="price-display">
-                        <h5>
-                            <span style="text-decoration: line-through; color: #999;" id="original-price">
-                                {{ $symbol }}{{ number_format($product->price * $rate, 2) }}
-                            </span>
-                            <span style="color: #e74c3c; margin-left: 10px;" id="current-price">
-                                {{ $symbol }}{{ number_format(($product->special_price ?? $product->price) * $rate, 2) }}
-                            </span>
-                        </h5>
-                    </div>
-
-                    <p class="available-stock" style="display: none;">
-                        <span><a href="#" id="stock-display">{{ $product->stock }} Stock</a></span>
-                    </p>
-
-                    <h4>Short Description:</h4>
-                    <p>{{ $product->short_description ?? $product->description }}</p>
-
-
-                    <form id="add-to-cart-form" action="{{ route('cart.store', ['lang' => $langCode]) }}"
-                        method="POST">
-                        @csrf
-                        <input type="hidden" name="product_id" value="{{ $product->id }}">
-                        <input type="hidden" name="combination_id" id="combination_id"
-                            value="{{ $attributeCombinations->first()->id ?? '' }}">
-
-                        <div class="row mb-4" id="variant-combination-boxes">
-                            @foreach ($attributeCombinations as $index => $combination)
-                                <div class="col-md-4 col-sm-6 mb-3">
-                                    <div class="variant-box {{ $index === 0 ? 'selected' : '' }}"
-                                        data-combination-id="{{ $combination->id }}">
-                                        <div class="variant-content">
-                                            @php
-                                                $valueIds = is_array($combination->attribute_value_ids)
-                                                    ? $combination->attribute_value_ids
-                                                    : explode(',', $combination->attribute_value_ids);
-                                                $attributeValues = \App\Models\AttributeValue::whereIn('id', $valueIds)
-                                                    ->with('attribute')
-                                                    ->get();
-                                            @endphp
-                                            @foreach ($attributeValues as $value)
-                                                <div class="variant-details">
-                                                    <span
-                                                        class="attribute-name">{{ $value->attribute->name ?? 'N/A' }}:</span>
-                                                    <span class="attribute-value">{{ $value->value ?? 'N/A' }}</span>
-                                                </div>
-                                            @endforeach
-                                            <div class="variant-price">
-                                                <span
-                                                    class="special-price">{{ $symbol }}{{ number_format($combination->price * $rate, 2) }}</span>
-                                            </div>
-                                            @if ($combination->stock <= 0)
-                                                <div class="badge badge-danger mt-2">Out of Stock</div>
-                                            @endif
-                                        </div>
-                                    </div>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+            <div>
+                <div class="glass rounded-2xl p-2 border border-[rgba(255,255,255,0.06)]">
+                    <div id="productCarousel" class="carousel slide" data-ride="carousel">
+                        <div class="carousel-inner rounded-xl overflow-hidden">
+                            @foreach ($images as $key => $image)
+                                <div class="carousel-item {{ $key === 0 ? 'active' : '' }}">
+                                    <img src="{{ $image->getUrl() }}" alt="{{ $product->name }}" class="w-full aspect-square object-cover">
                                 </div>
                             @endforeach
                         </div>
-
-                        <div class="form-group quantity-box">
-                            <label class="quantity-label control-label">Quantity</label>
-                            <input type="number" name="quantity" class="form-control" id="quantity" value="1"
-                                min="1" max="{{ $product->stock }}" required>
+                        @if ($images->count() > 1)
+                            <button class="carousel-control-prev" type="button" data-target="#productCarousel" data-slide="prev">
+                                <span class="w-10 h-10 flex items-center justify-center rounded-full glass text-white" aria-hidden="true"><i class="fas fa-chevron-left"></i></span>
+                            </button>
+                            <button class="carousel-control-next" type="button" data-target="#productCarousel" data-slide="next">
+                                <span class="w-10 h-10 flex items-center justify-center rounded-full glass text-white" aria-hidden="true"><i class="fas fa-chevron-right"></i></span>
+                            </button>
+                        @endif
+                    </div>
+                    @if ($images->count() > 1)
+                        <div class="flex gap-2 mt-2">
+                            @foreach ($images as $key => $image)
+                                <img src="{{ $image->getUrl() }}" alt="thumb"
+                                    class="w-16 h-16 object-cover rounded-lg cursor-pointer border-2 transition-colors {{ $key === 0 ? 'border-[#6C3BF1]' : 'border-transparent hover:border-[rgba(255,255,255,0.2)]' }}"
+                                    onclick="$('#productCarousel').carousel({{ $key }})">
+                            @endforeach
                         </div>
-
-                        <div class="price-box-bar">
-                            <div class="cart-and-bay-btn">
-                                <a class="btn hvr-hover"
-                                    href="{{ route('wishlist.add', ['lang' => session('language_code', app()->getLocale()), 'id' => $product->id]) }}">
-                                    {{ __('buttons.add_to_wishlist') }}
-                                </a>
-                                @auth
-                                    <button type="submit" class="btn hvr-hover"> {{ __('buttons.Add to Cart') }}</button>
-                                    <button type="button" class="btn hvr-hover"
-                                        id="buy-now-btn">{{ __('buttons.buy_now') }}</button>
-                                @else
-                                    <a href="{{ route('login', ['lang' => session('language_code', app()->getLocale())]) }}"
-                                        class="btn hvr-hover"> {{ __('buttons.Add to Cart') }}</a>
-                                    <a href="{{ route('login', ['lang' => session('language_code', app()->getLocale())]) }}"
-                                        class="btn hvr-hover">{{ __('buttons.buy_now') }}</a>
-                                @endauth
-                            </div>
-                        </div>
-                    </form>
-                </div>
-
-                <div class="share-bar">
-                    <a class="btn hvr-hover" href="#"><i class="fab fa-facebook" aria-hidden="true"></i></a>
-                    <a class="btn hvr-hover" href="#"><i class="fab fa-google-plus"
-                            aria-hidden="true"></i></a>
-                    <a class="btn hvr-hover" href="#"><i class="fab fa-twitter" aria-hidden="true"></i></a>
-                    <a class="btn hvr-hover" href="#"><i class="fab fa-pinterest-p"
-                            aria-hidden="true"></i></a>
-                    <a class="btn hvr-hover" href="#"><i class="fab fa-whatsapp" aria-hidden="true"></i></a>
+                    @endif
                 </div>
             </div>
-        </div>
 
-        <div class="col-12 mt-5">
-            <h3 class="mb-4 fw-bold text-dark"> {{ __('buttons.customer_reviews') }} <span
-                    class="text-muted">({{ $approvedReviews->count() }})</span></h3>
+            <div>
+                <span class="inline-block px-3 py-1 text-xs font-semibold rounded-full bg-[#6C3BF1]/20 text-[#8B5CF6] border border-[#6C3BF1]/30 mb-3">
+                    @if ($product->category) {{ $product->category->name }} @else Product @endif
+                </span>
+                <h1 class="text-2xl lg:text-3xl font-bold text-white mb-4">{{ $product->name }}</h1>
+                <div class="flex items-center gap-2 mb-4">
+                    <div class="flex text-[#F59E0B] text-sm">
+                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i>
+                    </div>
+                    <span class="text-sm text-[#9CA3AF]">(4.5 Reviews)</span>
+                </div>
 
-            @if ($approvedReviews->isEmpty())
-                <p class="text-muted fst-italic">No reviews yet. Be the first to share your thoughts!</p>
-            @else
-                <div class="row g-4">
-                    @foreach ($approvedReviews as $review)
-                        <div class="col-md-6">
-                            <div class="card shadow-sm h-100">
-                                <div class="card-body">
-                                    <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <h5 class="card-title mb-0">
-                                            {{ $review->user ? $review->user->name : $review->reviewer_name }}</h5>
-                                        <small
-                                            class="text-muted fst-italic">{{ $review->created_at->diffForHumans() }}</small>
-                                    </div>
-                                    <div class="mb-3">
-                                        @for ($i = 1; $i <= 5; $i++)
-                                            @if ($i <= $review->rating)
-                                                <i class="fas fa-star text-warning"></i>
-                                            @else
-                                                <i class="far fa-star text-warning"></i>
-                                            @endif
-                                        @endfor
-                                    </div>
-                                    <p class="card-text text-secondary">{{ $review->comment }}</p>
+                <div class="flex items-baseline gap-3 mb-6">
+                    @if ($hasSpecialPrice)
+                        <span class="text-3xl font-bold text-[#8B5CF6]">{{ $symbol }}{{ number_format($product->special_price * $rate, 2) }}</span>
+                        <span class="text-lg text-[#6B7280] line-through">{{ $symbol }}{{ number_format($product->price * $rate, 2) }}</span>
+                        <span class="badge-sale text-xs">SAVE {{ round($discount) }}%</span>
+                    @else
+                        <span class="text-3xl font-bold text-white">{{ $symbol }}{{ number_format($product->price * $rate, 2) }}</span>
+                    @endif
+                </div>
+
+                <p class="text-sm text-[#9CA3AF] leading-relaxed mb-6">{{ $product->description }}</p>
+
+                @if ($product->variants && $product->variants->count() > 0)
+                    <div class="mb-6">
+                        <h3 class="text-sm font-medium text-white mb-3">Variants</h3>
+                        <div class="flex flex-wrap gap-2">
+                            @foreach ($product->variants as $variant)
+                                <div class="px-4 py-2 rounded-xl glass border border-[rgba(255,255,255,0.06)] hover:border-[#6C3BF1] transition-all cursor-pointer text-center">
+                                    <p class="text-xs text-[#9CA3AF]">{{ $variant->label ?? $variant->name }}</p>
+                                    <p class="text-sm font-medium text-white">{{ $symbol }}{{ number_format($variant->price * $rate, 2) }}</p>
                                 </div>
-                            </div>
+                            @endforeach
                         </div>
-                    @endforeach
-                </div>
-            @endif
-
-            <hr class="my-5">
-
-            @if (session('success'))
-                <div class="alert alert-success rounded-0">{{ session('success') }}</div>
-            @endif
-
-            @if ($errors->any())
-                <div class="alert alert-danger rounded-0">
-                    <ul class="mb-0">
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
-
-            <form action="{{ route('reviews.store') }}" method="POST">
-                @csrf
-                <input type="hidden" name="product_id" value="{{ $product->id }}">
-
-                @guest
-                    <div class="mb-3">
-                        <label for="reviewer_name" class="form-label fw-semibold">Name <span
-                                class="text-danger">*</span></label>
-                        <input type="text" name="reviewer_name" id="reviewer_name" class="form-control shadow-sm"
-                            required value="{{ old('reviewer_name') }}">
                     </div>
-                    <div class="mb-3">
-                        <label for="reviewer_email" class="form-label fw-semibold">Email <span
-                                class="text-danger">*</span></label>
-                        <input type="email" name="reviewer_email" id="reviewer_email" class="form-control shadow-sm"
-                            required value="{{ old('reviewer_email') }}">
-                    </div>
-                @endguest
+                @endif
 
-                <div class="form-group mb-3">
-                    <label class="form-label fw-semibold d-block">{{ __('buttons.rating') }} <span
-                            class="text-danger">*</span></label>
-                    <div class="star-rating-wrap">
-                        @for ($i = 1; $i <= 5; $i++)
-                            <span class="star" data-value="{{ $i }}">&#9733;</span>
-                        @endfor
-                        <input type="hidden" name="rating" id="rating-value" value="{{ old('rating', 0) }}">
+                <div class="flex items-center gap-4 mb-6">
+                    <div class="flex items-center glass rounded-xl border border-[rgba(255,255,255,0.06)]">
+                        <button onclick="decrementQty()" class="px-4 py-2.5 text-[#9CA3AF] hover:text-white transition-colors"><i class="fas fa-minus"></i></button>
+                        <span id="qty-display" class="px-4 py-2.5 text-white font-medium min-w-[40px] text-center">1</span>
+                        <button onclick="incrementQty()" class="px-4 py-2.5 text-[#9CA3AF] hover:text-white transition-colors"><i class="fas fa-plus"></i></button>
+                    </div>
+                    <form action="{{ route('cart.add') }}" method="POST" class="flex-1">
+                        @csrf
+                        <input type="hidden" name="product_id" value="{{ $product->id }}">
+                        <input type="hidden" name="qty" id="qty-input" value="1">
+                        <button type="submit" class="btn-primary w-full justify-center">
+                            <i class="fas fa-shopping-bag"></i> {{ __('buttons.Add to Cart') }}
+                        </button>
+                    </form>
+                    <a href="{{ route('wishlist.add', ['lang' => $langCode, 'id' => $product->id]) }}"
+                        class="w-12 h-12 flex items-center justify-center rounded-xl glass border border-[rgba(255,255,255,0.06)] text-[#9CA3AF] hover:text-[#EF4444] hover:border-[#EF4444]/30 transition-all">
+                        <i class="far fa-heart"></i>
+                    </a>
+                </div>
+
+                <div class="glass rounded-2xl p-5 border border-[rgba(255,255,255,0.06)]">
+                    <div class="flex items-center gap-4 text-sm">
+                        <div class="flex items-center gap-2 text-[#9CA3AF]">
+                            <i class="fas fa-truck text-[#8B5CF6]"></i>
+                            <span>Free Shipping</span>
+                        </div>
+                        <div class="w-px h-4 bg-[rgba(255,255,255,0.06)]"></div>
+                        <div class="flex items-center gap-2 text-[#9CA3AF]">
+                            <i class="fas fa-undo text-[#8B5CF6]"></i>
+                            <span>7 Days Return</span>
+                        </div>
+                        <div class="w-px h-4 bg-[rgba(255,255,255,0.06)]"></div>
+                        <div class="flex items-center gap-2 text-[#9CA3AF]">
+                            <i class="fas fa-shield-alt text-[#8B5CF6]"></i>
+                            <span>Secure Payment</span>
+                        </div>
                     </div>
                 </div>
-
-                <div class="mb-4">
-                    <label for="comment" class="form-label fw-semibold">{{ __('buttons.comment') }}</label>
-                    <textarea name="comment" id="comment" rows="4" class="form-control shadow-sm">{{ old('comment') }}</textarea>
-                </div>
-
-                <button type="submit" class="btn btn-warning px-4">{{ __('buttons.submit_review') }}</button>
-            </form>
+            </div>
         </div>
     </div>
 </div>
 
-<style>
-    /* Star rating hover effect */
-    .star-rating input[type=radio]:checked~label i,
-    .star-rating label:hover~label i,
-    .star-rating label:hover i {
-        color: #ffb300 !important;
+@push('scripts')
+<script>
+    function incrementQty() {
+        let qty = parseInt(document.getElementById('qty-display').textContent);
+        qty++;
+        document.getElementById('qty-display').textContent = qty;
+        document.getElementById('qty-input').value = qty;
     }
-</style>
-
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
-
-@include('includes.footer')
-
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const attributeCombinations = @json($attributeCombinations);
-        const langCode = "{{ session('language_code', app()->getLocale()) }}";
-
-        const addToCartButton = document.querySelector('button[type="submit"]');
-        const buyNowButton = document.getElementById('buy-now-btn');
-
-        document.querySelectorAll('.variant-box').forEach(box => {
-            box.addEventListener('click', function() {
-                document.querySelectorAll('.variant-box').forEach(b => b.classList.remove(
-                    'selected'));
-                this.classList.add('selected');
-
-                const combinationId = this.dataset.combinationId;
-                const combination = attributeCombinations.find(c => c.id == combinationId);
-
-                if (combination) {
-                    let currencySymbol = @json(session('currency_symbol', '₹'));
-                    let currencyRate = parseFloat(@json(session('currency_rate', 1)));
-                    let convertedPrice = (combination.price * currencyRate).toLocaleString(
-                        'en-IN', {
-                            minimumFractionDigits: 2
-                        });
-                    document.getElementById('current-price').textContent = currencySymbol +
-                        convertedPrice;
-
-                    document.getElementById('stock-display').textContent = combination.stock +
-                        ' Stock';
-                    document.getElementById('quantity').max = combination.stock;
-                    document.getElementById('combination_id').value = combinationId;
-
-                    if (combination.stock <= 0) {
-                        addToCartButton.disabled = true;
-                        buyNowButton.disabled = true;
-                        addToCartButton.textContent = "Out of Stock";
-                        buyNowButton.textContent = "Out of Stock";
-                    } else {
-                        addToCartButton.disabled = false;
-                        buyNowButton.disabled = false;
-                        addToCartButton.textContent = " {{ __('buttons.Add to Cart') }}";
-                        buyNowButton.textContent = "{{ __('buttons.buy_now') }}";
-                    }
-                }
-            });
-        });
-
-        buyNowButton.addEventListener('click', function() {
-            if (buyNowButton.disabled) return;
-
-            const productId = "{{ $product->id }}";
-            const qty = document.getElementById('quantity').value || 1;
-            const combinationId = document.getElementById('combination_id').value || '';
-            const url = `/${langCode}/buy/${productId}?qty=${qty}&combination_id=${combinationId}`;
-            window.location.href = url;
-        });
-    });
+    function decrementQty() {
+        let qty = parseInt(document.getElementById('qty-display').textContent);
+        if (qty > 1) { qty--; }
+        document.getElementById('qty-display').textContent = qty;
+        document.getElementById('qty-input').value = qty;
+    }
 </script>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const stars = document.querySelectorAll('.star-rating-wrap .star');
-        const ratingInput = document.getElementById('rating-value');
-        const ratingError = document.getElementById('rating-error');
-        let selectedValue = parseInt(ratingInput.value) || 0;
-
-        highlightStars(selectedValue);
-
-        stars.forEach((star, idx) => {
-            star.addEventListener('mouseenter', () => {
-                highlightStars(idx + 1, true);
-            });
-            star.addEventListener('mouseleave', () => {
-                highlightStars(selectedValue);
-            });
-            star.addEventListener('click', () => {
-                selectedValue = idx + 1;
-                ratingInput.value = selectedValue;
-                highlightStars(selectedValue);
-                ratingError.classList.add('d-none');
-            });
-        });
-
-        const reviewForm = document.querySelector('form');
-        reviewForm.addEventListener('submit', function(e) {
-            if (ratingInput.value === '0' || !ratingInput.value) {
-                e.preventDefault();
-                ratingError.classList.remove('d-none');
-                ratingError.scrollIntoView({
-                    behavior: 'smooth'
-                });
-            }
-        });
-
-        function highlightStars(count, hover = false) {
-            stars.forEach((star, i) => {
-                if (i < count) star.classList.add(hover ? 'hovered' : 'selected');
-                else star.classList.remove('hovered', 'selected');
-            });
-        }
-    });
-</script>
+@endpush
+@endsection

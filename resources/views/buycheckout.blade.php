@@ -1,232 +1,160 @@
 @php
     $title = 'Checkout';
-
 @endphp
-@include('includes.header')
+@extends('layouts.app')
 
+@section('content')
 @php
     $symbol = session('currency_symbol', '₹');
     $rate = session('currency_rate', 1);
     $langCode = session('language_code', app()->getLocale());
+    $subtotal = $product->price * $qty;
+    $discount = session('coupon_discount', 0);
+    $coupon = session('coupon', null);
+    $grandTotal = $subtotal - $discount;
 @endphp
 
-
-<div class="all-title-box">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-12">
-                <h2>{{ __('buttons.checkout') }}</h2>
-                <ul class="breadcrumb">
-                    <li class="breadcrumb-item"><a
-                            href="{{ route('lang.index', ['lang' => $langCode]) }}">{{ __('buttons.home') }}</a></li>
-                    <li class="breadcrumb-item active">{{ __('buttons.checkout') }}</li>
-                </ul>
-            </div>
+<div class="pt-24 pb-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center gap-2 text-sm text-[#9CA3AF] mb-6">
+            <a href="{{ route('lang.index', ['lang' => $langCode]) }}" class="hover:text-[#8B5CF6] transition-colors">{{ __('buttons.home') }}</a>
+            <i class="fas fa-chevron-right text-[10px]"></i>
+            <span class="text-[#F1F1F6]">{{ __('buttons.checkout') }}</span>
         </div>
-    </div>
-</div>
 
-<div class="cart-box-main">
-    <div class="container">
-    
-        <div class="row">
-            <div class="col-sm-6 col-lg-6 mb-3">
-                <div class="checkout-address">
-                    <div class="title-left">
-                        <h3>{{ __('buttons.billing_address') }}</h3>
+        <h1 class="text-2xl lg:text-3xl font-bold text-white mb-8">{{ __('buttons.checkout') }}</h1>
+
+        <form id="checkout-form" method="POST" action="">
+            @csrf
+            <input type="hidden" name="product_id" value="{{ $product->id }}">
+            <input type="hidden" name="qty" value="{{ $qty }}">
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-2 space-y-6">
+                    <div class="glass rounded-2xl p-6 lg:p-8 border border-[rgba(255,255,255,0.06)]">
+                        <h3 class="text-white font-semibold text-lg mb-6">{{ __('buttons.billing_address') }}</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm text-[#9CA3AF] mb-1.5">Name *</label>
+                                <input type="text" name="name" value="{{ old('name') }}" class="input-field" required>
+                                @error('name') <p class="text-xs text-[#EF4444] mt-1">{{ $message }}</p> @enderror
+                            </div>
+                            <div>
+                                <label class="block text-sm text-[#9CA3AF] mb-1.5">Phone *</label>
+                                <input type="text" name="phone" value="{{ old('phone') }}" class="input-field" required>
+                                @error('phone') <p class="text-xs text-[#EF4444] mt-1">{{ $message }}</p> @enderror
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-sm text-[#9CA3AF] mb-1.5">Email *</label>
+                                <input type="email" name="email" value="{{ old('email') }}" class="input-field" required>
+                                @error('email') <p class="text-xs text-[#EF4444] mt-1">{{ $message }}</p> @enderror
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-sm text-[#9CA3AF] mb-1.5">Address *</label>
+                                <input type="text" name="address" value="{{ old('address') }}" class="input-field" required>
+                                @error('address') <p class="text-xs text-[#EF4444] mt-1">{{ $message }}</p> @enderror
+                            </div>
+                            <div>
+                                <label class="block text-sm text-[#9CA3AF] mb-1.5">Country *</label>
+                                <select name="country" class="input-field">
+                                    <option value="" disabled selected>Choose...</option>
+                                    <option value="india" {{ old('country') == 'india' ? 'selected' : '' }}>India</option>
+                                    <option value="usa" {{ old('country') == 'usa' ? 'selected' : '' }}>USA</option>
+                                </select>
+                                @error('country') <p class="text-xs text-[#EF4444] mt-1">{{ $message }}</p> @enderror
+                            </div>
+                            <div>
+                                <label class="block text-sm text-[#9CA3AF] mb-1.5">State *</label>
+                                <select name="state" class="input-field">
+                                    <option value="" disabled selected>Choose...</option>
+                                    <option value="rajsthan" {{ old('state') == 'rajsthan' ? 'selected' : '' }}>Rajasthan</option>
+                                    <option value="gujrat" {{ old('state') == 'gujrat' ? 'selected' : '' }}>Gujarat</option>
+                                </select>
+                                @error('state') <p class="text-xs text-[#EF4444] mt-1">{{ $message }}</p> @enderror
+                            </div>
+                            <div>
+                                <label class="block text-sm text-[#9CA3AF] mb-1.5">City *</label>
+                                <select name="city" class="input-field">
+                                    <option value="" disabled selected>Choose...</option>
+                                    <option value="jaipur" {{ old('city') == 'jaipur' ? 'selected' : '' }}>Jaipur</option>
+                                    <option value="bikaner" {{ old('city') == 'bikaner' ? 'selected' : '' }}>Bikaner</option>
+                                </select>
+                                @error('city') <p class="text-xs text-[#EF4444] mt-1">{{ $message }}</p> @enderror
+                            </div>
+                            <div>
+                                <label class="block text-sm text-[#9CA3AF] mb-1.5">Zip *</label>
+                                <input type="text" name="pin_code" value="{{ old('pin_code') }}" class="input-field" required>
+                                @error('pin_code') <p class="text-xs text-[#EF4444] mt-1">{{ $message }}</p> @enderror
+                            </div>
+                        </div>
+
+                        <div class="mt-6">
+                            <h4 class="text-sm font-medium text-white mb-3">{{ __('buttons.payment_method') }}</h4>
+                            <div class="space-y-2">
+                                <label class="flex items-center gap-3 p-3 rounded-xl glass border border-[rgba(255,255,255,0.06)] cursor-pointer hover:border-[#6C3BF1]/30 transition-all">
+                                    <input type="radio" name="payment_method" value="stripe" checked class="text-[#6C3BF1] focus:ring-[#6C3BF1]">
+                                    <span class="text-sm text-[#F1F1F6]">{{ __('buttons.payment_method_stripe') }}</span>
+                                </label>
+                                <label class="flex items-center gap-3 p-3 rounded-xl glass border border-[rgba(255,255,255,0.06)] cursor-pointer hover:border-[#6C3BF1]/30 transition-all">
+                                    <input type="radio" name="payment_method" value="cod" class="text-[#6C3BF1] focus:ring-[#6C3BF1]">
+                                    <span class="text-sm text-[#F1F1F6]">{{ __('buttons.payment_method_cod') }}</span>
+                                </label>
+                            </div>
+                        </div>
                     </div>
-                    <form id="checkout-form" method="POST" action="">
-                        @csrf
-                        <input type="hidden" name="product_id" value="{{ $product->id }}">
-                        <input type="hidden" name="qty" value="{{ $qty }}">
-
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label>Name *</label>
-                                <input type="text" class="form-control" name="name" value="{{ old('name') }}">
-                                @error('name')
-                                    <span class="text-danger">{{ $message }}</span>
-                                @enderror
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label>Phone *</label>
-                                <input type="text" class="form-control" name="phone" value="{{ old('phone') }}">
-                                @error('phone')
-                                    <span class="text-danger">{{ $message }}</span>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label>Email *</label>
-                            <input type="email" class="form-control" name="email" value="{{ old('email') }}">
-                            @error('email')
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
-                        </div>
-
-                        <div class="mb-3">
-                            <label>Address *</label>
-                            <input type="text" class="form-control" name="address" value="{{ old('address') }}">
-                            @error('address')
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label>Country *</label>
-                                <select class="form-control" name="country">
-                                    <option value="" selected disabled>Choose...</option>
-                                    <option value="india" {{ old('country') == 'india' ? 'selected' : '' }}>India
-                                    </option>
-                                    <option value="usa" {{ old('country') == 'usa' ? 'selected' : '' }}>Usa</option>
-                                    <option value="pakisthan"{{ old('country') == 'pakisthan' ? 'selected' : '' }}>
-                                        pakisthan</option>
-                                </select>
-                                @error('country')
-                                    <span class="text-danger">{{ $message }}</span>
-                                @enderror
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="state">State *</label>
-                                <select class="wide w-100" id="state" name="state">
-                                    <option value="" selected disabled>Choose...</option>
-                                    <option value="rajsthan" {{ old('state') == 'rajsthan' ? 'selected' : '' }}>
-                                        Rajsthan</option>
-                                    <option value="uk"{{ old('state') == 'uk' ? 'selected' : '' }}>uk</option>
-                                    <option value="mp"{{ old('state') == 'mp' ? 'selected' : '' }}>MP</option>
-                                    <option value="gujrat" {{ old('state') == 'gujrat' ? 'selected' : '' }}>Gujrat
-                                    </option>
-                                </select>
-
-                                @error('state')
-                                    <span class="text-danger">{{ $message }}</span>
-                                @enderror
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="state">City *</label>
-                                <select class="wide w-100" id="state" name="city">
-                                    <option value="" selected disabled>Choose...</option>
-                                    <option value="churu" {{ old('city') == 'churu' ? 'selected' : '' }}>Churu
-                                    </option>
-                                    <option value="bikaner" {{ old('city') == 'bikaner' ? 'selected' : '' }}>Bikaner
-                                    </option>
-                                    <option value="jaipur" {{ old('city') == 'jaipur' ? 'selected' : '' }}>jaipur
-                                    </option>
-                                </select>
-                                @error('city')
-                                    <span class="text-danger">{{ $message }}</span>
-                                @enderror
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label>Zip *</label>
-                                <input type="text" class="form-control" name="pin_code"
-                                    value="{{ old('pin_code') }}">
-                                @error('pin_code')
-                                    <span class="text-danger">{{ $message }}</span>
-                                @enderror
-                            </div>
-
-                        </div>
-
-                        <div class="d-block my-3">
-                            <div class="custom-control custom-radio">
-                                <input id="stripe" name="payment_method" type="radio" class="custom-control-input"
-                                    value="stripe" checked>
-                                <label class="custom-control-label"
-                                    for="stripe">{{ __('buttons.payment_method_stripe') }}</label>
-                            </div>
-                            <div class="custom-control custom-radio">
-                                <input id="cod" name="payment_method" type="radio" class="custom-control-input"
-                                    value="cod">
-                                <label class="custom-control-label"
-                                    for="cod">{{ __('buttons.payment_method_cod') }}</label>
-                            </div>
-                        </div>
-
-                        <button type="submit" class="btn hvr-hover mt-3">Place Order</button>
-                    </form>
                 </div>
-            </div>
 
-            <div class="col-sm-6 col-lg-6 mb-3">
-                <div class="order-box">
-                    <h3>Your Product</h3>
-                    <div class="media mb-2 border-bottom">
-                        <div class="media-body">
-                            <a
-                                href="{{ route('product.detail', ['lang' => $langCode, 'url_key' => $product->url_key]) }}">{{ $product->name }}</a>
-                            <div class="small text-muted">
-                                Qty: {{ $qty }}<br>
-                                Price: {{ $symbol }}{{ number_format($product->price * $rate, 2) }}
-
+                <div>
+                    <div class="glass rounded-2xl p-6 border border-[rgba(255,255,255,0.06)] sticky top-24">
+                        <h3 class="text-white font-semibold text-lg mb-4">{{ __('buttons.your_order') }}</h3>
+                        <div class="flex items-center gap-3 pb-4 border-b border-[rgba(255,255,255,0.06)]">
+                            <img src="{{ $product->getFirstMediaUrl('image') }}" class="w-16 h-16 rounded-xl object-cover">
+                            <div class="flex-1 min-w-0">
+                                <a href="{{ route('product', ['lang' => $langCode, 'url_key' => $product->url_key]) }}" class="text-sm text-white hover:text-[#8B5CF6] transition-colors truncate block">{{ $product->name }}</a>
+                                <p class="text-xs text-[#9CA3AF]">Qty: {{ $qty }}</p>
+                                <p class="text-sm font-medium text-white mt-1">{{ $symbol }}{{ number_format($product->price * $rate, 2) }}</p>
                             </div>
                         </div>
-                    </div>
-
-                    @php
-                        $subtotal = $product->price * $qty;
-                        $discount = session('coupon_discount', 0);
-                        $coupon = session('coupon', null);
-                        $grandTotal = $subtotal - $discount;
-                    @endphp
-
-                    <hr class="my-2">
-                    <div class="d-flex">
-                        <h4>{{ __('buttons.sub_total') }}</h4>
-                        <div class="ml-auto font-weight-bold">
-                            {{ $symbol }}{{ number_format($subtotal * $rate, 2) }}
-                        </div>
-
-                    </div>
-                    <div class="d-flex">
-                        <h4>{{ __('buttons.discount') }}</h4>
-                        <div class="ml-auto font-weight-bold">
+                        <div class="space-y-2 pt-4 text-sm">
+                            <div class="flex justify-between text-[#9CA3AF]">
+                                <span>{{ __('buttons.sub_total') }}</span>
+                                <span>{{ $symbol }}{{ number_format($subtotal * $rate, 2) }}</span>
+                            </div>
                             @if ($coupon)
-                                ({{ $coupon }})
+                            <div class="flex justify-between text-[#9CA3AF]">
+                                <span>{{ __('buttons.discount') }} ({{ $coupon }})</span>
+                                <span class="text-[#10B981]">-{{ $symbol }}{{ number_format($discount * $rate, 2) }}</span>
+                            </div>
                             @endif
+                            <div class="flex justify-between text-[#9CA3AF]">
+                                <span>{{ __('buttons.shipping_cost') }}</span>
+                                <span class="text-[#10B981]">Free</span>
+                            </div>
+                            <div class="border-t border-[rgba(255,255,255,0.06)] pt-2 flex justify-between text-white font-semibold">
+                                <span>{{ __('buttons.grand_total') }}</span>
+                                <span class="text-lg">{{ $symbol }}{{ number_format($grandTotal * $rate, 2) }}</span>
+                            </div>
                         </div>
-                    </div>
-                    <hr class="my-1">
-                    <div class="d-flex">
-                        <h4>{{ __('buttons.coupon_discount') }}</h4>
-                        <div class="ml-auto font-weight-bold">
-                            {{ $symbol }}{{ number_format($discount * $rate, 2) }}
+                        <div class="mt-4">
+                            <form action="{{ route('apply.coupon', ['lang' => $langCode]) }}" method="POST" class="flex gap-2">
+                                @csrf
+                                <input type="hidden" name="product_id" value="{{ $product->id }}">
+                                <input type="hidden" name="qty" value="{{ $qty }}">
+                                <input type="text" name="coupon" placeholder="Coupon Code" class="input-field text-sm flex-1">
+                                <button type="submit" class="btn-secondary text-sm py-2 px-4 whitespace-nowrap">{{ __('buttons.apply_coupon') }}</button>
+                            </form>
                         </div>
-
-                    </div>
-
-                    <div class="d-flex">
-                        <h4>{{ __('buttons.shipping_cost') }}</h4>
-                        <div class="ml-auto font-weight-bold">Free</div>
-                    </div>
-                    <hr class="my-2">
-                    <div class="d-flex gr-total">
-                        <h5>{{ __('buttons.grand_total') }}</h5>
-                        <div class="ml-auto h5">{{ $symbol }}{{ number_format($grandTotal * $rate, 2) }}</div>
-                    </div>
-                </div>
-
-                <div class="row my-4">
-                    <div class="col-lg-12">
-                        <form action="{{ route('apply.coupon', ['lang' => $langCode]) }}" method="POST"
-                            class="d-flex">
-                            @csrf
-                            <input type="text" name="coupon" class="form-control"
-                                placeholder="Enter Coupon Code">
-                            <input type="hidden" name="product_id" value="{{ $product->id }}">
-                            <input type="hidden" name="qty" value="{{ $qty }}">
-                            <button type="submit"
-                                class="btn btn-theme ms-2">{{ __('buttons.apply_coupon') }}</button>
-                        </form>
+                        <button type="submit" class="btn-primary w-full justify-center mt-6">
+                            <i class="fas fa-lock"></i> {{ __('buttons.place_order') }}
+                        </button>
                     </div>
                 </div>
             </div>
-        </div>
+        </form>
     </div>
 </div>
 
+@push('scripts')
 <script>
     document.getElementById('checkout-form').addEventListener('submit', function(e) {
         const selectedMethod = document.querySelector('input[name="payment_method"]:checked').value;
@@ -237,5 +165,5 @@
         }
     });
 </script>
-
-@include('includes.footer')
+@endpush
+@endsection

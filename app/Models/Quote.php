@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Quote extends Model
 {
-     protected $fillable = [
+    protected $fillable = [
 
         'cart_id',
         'user_id',

@@ -81,8 +81,9 @@ class UserController extends Controller
             'gender' => $request->gender,
             'is_admin'=>1,
         ];
+        
         $user = User::create($insert);
-  $user->syncRoles($request->roles);
+        $user->syncRoles($request->roles);
         if ($request->hasFile('image') && $request->file('image')->isValid()) {
             $user->addMediaFromRequest('image')->toMediaCollection('image');
         }

@@ -87,7 +87,7 @@
 <script src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
 
-<script>
+{{-- <script>
     // Normal messages
     @if(session('message'))
         toastr.success("{{ session('message') }}", '', { timeOut: 2000 });
@@ -106,7 +106,7 @@
                 tapToDismiss: false,
                 onHidden: function() {
                   
-                    if(confirm('Do you want to Login? Click Cancel for Register')) {
+                    if(confirm('Do you want to Login?')) {
                         window.location.href = "{{ route('login') }}";
                     } else {
                         window.location.href = "{{ route('register') }}";
@@ -119,6 +119,6 @@
             session()->flash('alert_shown', true); 
         @endphp
     @endif
-</script>
+</script> --}}
 
 

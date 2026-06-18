@@ -1,173 +1,35 @@
-@include('includes.header')
-<div class="top-search">
-    <div class="container">
-        <div class="input-group">
-            <span class="input-group-addon"><i class="fa fa-search"></i></span>
-            <input type="text" class="form-control" placeholder="Search">
-            <span class="input-group-addon close-search"><i class="fa fa-times"></i></span>
-        </div>
-    </div>
-</div>
+@php
+    $title = $page->name . ' - Zopify';
+    $meta_description = $page->meta_description ?? 'Zopify - ' . $page->name;
+    $meta_keywords = $page->meta_tag ?? 'zopify, ' . $page->name;
+@endphp
+@extends('layouts.app')
 
-<div class="all-title-box">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-12">
-
-                <h2>{{ strtoupper($page->name) }}</h2>
-                <ul class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{{ route('index') }}">{{ __('buttons.home') }}</a></li>
-                    <li class="breadcrumb-item active">{{ strtoupper($page->name) }}</li>
-                </ul>
-            </div>
+@section('content')
+<div class="pt-24 pb-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center gap-2 text-sm text-[#9CA3AF] mb-6">
+            <a href="{{ route('index') }}" class="hover:text-[#8B5CF6] transition-colors">{{ __('buttons.home') }}</a>
+            <i class="fas fa-chevron-right text-[10px]"></i>
+            <span class="text-[#F1F1F6]">{{ $page->name }}</span>
         </div>
-    </div>
-</div>
 
-<div class="about-box-main">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-6">
-                <h2 class="noo-sh-title">{{ $page->meta_title }}</span></h2>
-                <p>{{ $page->description }}</p>
-                <p>{{ $page->meta_description }}</p>
-            </div>
-            <div class="col-lg-6">
-                <div class="banner-frame"><img class="img-thumbnail img-fluid"
-                        src="{{ $page->getFirstMediaUrl('image') }}" loading="lazy" alt="" />
-                </div>
-            </div>
-        </div>
-        {{-- <div class="row my-5">
-                <div class="col-sm-6 col-lg-4">
-                    <div class="service-block-inner">
-                        <h3>We are Trusted</h3>
-                        <p>{{ $page->meta_tag }}</p>
-                    </div>
-                </div>
-                <div class="col-sm-6 col-lg-4">
-                    <div class="service-block-inner">
-                        <h3>We are Professional</h3>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+            <div>
+                <h1 class="text-2xl lg:text-4xl font-bold text-white mb-4">{{ $page->meta_title ?? $page->name }}</h1>
+                <div class="prose prose-invert text-sm text-[#9CA3AF] leading-relaxed space-y-4">
+                    <p>{{ $page->description }}</p>
+                    @if ($page->meta_description)
                         <p>{{ $page->meta_description }}</p>
-                    </div>
+                    @endif
                 </div>
-                <div class="col-sm-6 col-lg-4">
-                    <div class="service-block-inner">
-                        <h3>We are Expert</h3>
-                        <p>{{$page->meta_tag}}</p>
-                    </div>
+            </div>
+            @if ($page->getFirstMediaUrl('image'))
+                <div class="glass rounded-2xl p-2 border border-[rgba(255,255,255,0.06)]">
+                    <img src="{{ $page->getFirstMediaUrl('image') }}" alt="{{ $page->name }}" class="w-full rounded-xl">
                 </div>
-            </div> --}}
-        {{-- <p>{{$page->meta_tag}}</p> --}}
-        {{-- <div class="row my-4">
-                <div class="col-12">
-                    <h2 class="noo-sh-title">Meet Our Team</h2>
-                </div>
-                <div class="col-sm-6 col-lg-3">
-                    <div class="hover-team">
-                        <div class="our-team"> <img src="{{ asset('front/images/img-1.jpg')}}" alt="" />
-                            <div class="team-content">
-                                <h3 class="title">Williamson</h3> <span class="post">Web Developer</span> </div>
-                            <ul class="social">
-                                <li>
-                                    <a href="#" class="fab fa-facebook"></a>
-                                </li>
-                                <li>
-                                    <a href="#" class="fab fa-twitter"></a>
-                                </li>
-                                <li>
-                                    <a href="#" class="fab fa-google-plus"></a>
-                                </li>
-                                <li>
-                                    <a href="#" class="fab fa-youtube"></a>
-                                </li>
-                            </ul>
-                            <div class="icon"> <i class="fa fa-plus" aria-hidden="true"></i> </div>
-                        </div>
-                        <div class="team-description">
-                            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent urna diam, maximus ut ullamcorper quis, placerat id eros. Duis semper justo sed condimentum rutrum. Nunc tristique purus turpis. Maecenas vulputate. </p>
-                        </div>
-                        <hr class="my-0"> </div>
-                </div>
-                <div class="col-sm-6 col-lg-3">
-                    <div class="hover-team">
-                        <div class="our-team"> <img src="{{ asset('front/images/img-2.jpg')}}" alt="" />
-                            <div class="team-content">
-                                <h3 class="title">Kristiana</h3> <span class="post">Web Developer</span> </div>
-                            <ul class="social">
-                                <li>
-                                    <a href="#" class="fab fa-facebook"></a>
-                                </li>
-                                <li>
-                                    <a href="#" class="fab fa-twitter"></a>
-                                </li>
-                                <li>
-                                    <a href="#" class="fab fa-google-plus"></a>
-                                </li>
-                                <li>
-                                    <a href="#" class="fab fa-youtube"></a>
-                                </li>
-                            </ul>
-                            <div class="icon"> <i class="fa fa-plus" aria-hidden="true"></i> </div>
-                        </div>
-                        <div class="team-description">
-                            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent urna diam, maximus ut ullamcorper quis, placerat id eros. Duis semper justo sed condimentum rutrum. Nunc tristique purus turpis. Maecenas vulputate. </p>
-                        </div>
-                        <hr class="my-0"> </div>
-                </div>
-                <div class="col-sm-6 col-lg-3">
-                    <div class="hover-team">
-                        <div class="our-team"> <img src="{{ asset('front/images/img-3.jpg')}}" alt="" />
-                            <div class="team-content">
-                                <h3 class="title">Steve Thomas</h3> <span class="post">Web Developer</span> </div>
-                            <ul class="social">
-                                <li>
-                                    <a href="#" class="fab fa-facebook"></a>
-                                </li>
-                                <li>
-                                    <a href="#" class="fab fa-twitter"></a>
-                                </li>
-                                <li>
-                                    <a href="#" class="fab fa-google-plus"></a>
-                                </li>
-                                <li>
-                                    <a href="#" class="fab fa-youtube"></a>
-                                </li>
-                            </ul>
-                            <div class="icon"> <i class="fa fa-plus" aria-hidden="true"></i> </div>
-                        </div>
-                        <div class="team-description">
-                            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent urna diam, maximus ut ullamcorper quis, placerat id eros. Duis semper justo sed condimentum rutrum. Nunc tristique purus turpis. Maecenas vulputate. </p>
-                        </div>
-                        <hr class="my-0"> </div>
-                </div>
-                <div class="col-sm-6 col-lg-3">
-                    <div class="hover-team">
-                        <div class="our-team"> <img src="{{ asset('front/images/img-1.jpg')}}" alt="" />
-                            <div class="team-content">
-                                <h3 class="title">Williamson</h3> <span class="post">Web Developer</span> </div>
-                            <ul class="social">
-                                <li>
-                                    <a href="#" class="fab fa-facebook"></a>
-                                </li>
-                                <li>
-                                    <a href="#" class="fab fa-twitter"></a>
-                                </li>
-                                <li>
-                                    <a href="#" class="fab fa-google-plus"></a>
-                                </li>
-                                <li>
-                                    <a href="#" class="fab fa-youtube"></a>
-                                </li>
-                            </ul>
-                            <div class="icon"> <i class="fa fa-plus" aria-hidden="true"></i> </div>
-                        </div>
-                        <div class="team-description">
-                            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent urna diam, maximus ut ullamcorper quis, placerat id eros. Duis semper justo sed condimentum rutrum. Nunc tristique purus turpis. Maecenas vulputate. </p>
-                        </div>
-                        <hr class="my-0"> </div>
-                </div>
-            </div> --}}
+            @endif
+        </div>
     </div>
 </div>
-@include('includes.footer')
+@endsection

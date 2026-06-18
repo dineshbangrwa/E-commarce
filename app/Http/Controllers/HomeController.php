@@ -114,9 +114,9 @@ class HomeController extends Controller
 
         $translation = \App\Models\CatLanguage::where('category_id', $category->id)->first();
 
-if ($translation && isset($translation->translated_data[$langCode]['name'])) {
-    $category->name = $translation->translated_data[$langCode]['name'];
-}
+        if ($translation && isset($translation->translated_data[$langCode]['name'])) {
+            $category->name = $translation->translated_data[$langCode]['name'];
+        }
         $query = $category->products()->with('attributeValues.attribute');
 
         if ($request->filled('price_range')) {

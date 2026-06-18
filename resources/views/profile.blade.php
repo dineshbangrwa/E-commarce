@@ -1,147 +1,105 @@
 @php
     $title = 'My Account';
-    $langCode = session('language_code', app()->getLocale());
-
 @endphp
-@include('includes.header')
-<!-- Start All Title Box -->
-<div class="all-title-box">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-12">
-                <h2>My Account</h2>
-                <ul class="breadcrumb">
-                    <li class="breadcrumb-item"><a
-                            href="{{ route('lang.index', ['lang' => $langCode]) }}">{{ __('buttons.home') }}</a></li>
-                    <li class="breadcrumb-item active">My Account</li>
-                </ul>
+@extends('layouts.app')
+
+@section('content')
+@php
+    $langCode = session('language_code', app()->getLocale());
+@endphp
+
+<div class="pt-24 pb-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center gap-2 text-sm text-[#9CA3AF] mb-6">
+            <a href="{{ route('lang.index', ['lang' => $langCode]) }}" class="hover:text-[#8B5CF6] transition-colors">{{ __('buttons.home') }}</a>
+            <i class="fas fa-chevron-right text-[10px]"></i>
+            <span class="text-[#F1F1F6]">My Account</span>
+        </div>
+
+        <h1 class="text-2xl lg:text-3xl font-bold text-white mb-8">My Account</h1>
+
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            <div class="lg:col-span-1">
+                <div class="glass rounded-2xl p-6 border border-[rgba(255,255,255,0.06)] sticky top-24">
+                    <div class="text-center mb-6">
+                        <div class="w-16 h-16 rounded-full glass flex items-center justify-center mx-auto mb-3">
+                            <i class="fas fa-user text-2xl text-[#8B5CF6]"></i>
+                        </div>
+                        <h3 class="text-white font-semibold">{{ Auth::user()->name ?? 'User' }}</h3>
+                        <p class="text-xs text-[#9CA3AF]">{{ Auth::user()->email ?? '' }}</p>
+                    </div>
+                    <nav class="space-y-1">
+                        <a href="{{ route('profile', ['lang' => $langCode]) }}" class="flex items-center gap-3 px-4 py-2.5 text-sm rounded-lg bg-[rgba(108,59,241,0.15)] text-white">
+                            <i class="fas fa-user text-[#8B5CF6]"></i> Profile
+                        </a>
+                        <a href="{{ route('order.index', ['lang' => $langCode]) }}" class="flex items-center gap-3 px-4 py-2.5 text-sm rounded-lg text-[#9CA3AF] hover:text-white hover:bg-[rgba(255,255,255,0.05)] transition-all">
+                            <i class="fas fa-box"></i> Orders
+                        </a>
+                        <a href="{{ route('wishlist.index', ['lang' => $langCode]) }}" class="flex items-center gap-3 px-4 py-2.5 text-sm rounded-lg text-[#9CA3AF] hover:text-white hover:bg-[rgba(255,255,255,0.05)] transition-all">
+                            <i class="fas fa-heart"></i> Wishlist
+                        </a>
+                        <a href="{{ route('logout', ['lang' => $langCode]) }}" class="flex items-center gap-3 px-4 py-2.5 text-sm rounded-lg text-[#EF4444] hover:bg-[#EF4444]/10 transition-all">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                    </nav>
+                </div>
+            </div>
+
+            <div class="lg:col-span-3">
+                <div class="glass rounded-2xl p-6 lg:p-8 border border-[rgba(255,255,255,0.06)]">
+                    <h3 class="text-white font-semibold text-lg mb-6">Profile Information</h3>
+                    <form action="{{ route('profile.update') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
+                        @csrf
+                        @method('PUT')
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm text-[#9CA3AF] mb-1.5">First Name</label>
+                                <input type="text" name="first_name" value="{{ Auth::user()->first_name ?? old('first_name') }}" class="input-field">
+                            </div>
+                            <div>
+                                <label class="block text-sm text-[#9CA3AF] mb-1.5">Last Name</label>
+                                <input type="text" name="last_name" value="{{ Auth::user()->last_name ?? old('last_name') }}" class="input-field">
+                            </div>
+                            <div>
+                                <label class="block text-sm text-[#9CA3AF] mb-1.5">Email</label>
+                                <input type="email" name="email" value="{{ Auth::user()->email ?? old('email') }}" class="input-field">
+                            </div>
+                            <div>
+                                <label class="block text-sm text-[#9CA3AF] mb-1.5">Phone</label>
+                                <input type="tel" name="phone" value="{{ Auth::user()->phone ?? old('phone') }}" class="input-field">
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-sm text-[#9CA3AF] mb-1.5">Address</label>
+                                <input type="text" name="address" value="{{ Auth::user()->address ?? old('address') }}" class="input-field">
+                            </div>
+                            <div>
+                                <label class="block text-sm text-[#9CA3AF] mb-1.5">City</label>
+                                <input type="text" name="city" value="{{ Auth::user()->city ?? old('city') }}" class="input-field">
+                            </div>
+                            <div>
+                                <label class="block text-sm text-[#9CA3AF] mb-1.5">State</label>
+                                <input type="text" name="state" value="{{ Auth::user()->state ?? old('state') }}" class="input-field">
+                            </div>
+                            <div>
+                                <label class="block text-sm text-[#9CA3AF] mb-1.5">Postcode</label>
+                                <input type="text" name="postcode" value="{{ Auth::user()->postcode ?? old('postcode') }}" class="input-field">
+                            </div>
+                            <div>
+                                <label class="block text-sm text-[#9CA3AF] mb-1.5">Country</label>
+                                <input type="text" name="country" value="{{ Auth::user()->country ?? old('country') }}" class="input-field">
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-sm text-[#9CA3AF] mb-1.5">Profile Image</label>
+                                <input type="file" name="image" class="input-field file:text-[#9CA3AF] file:bg-[rgba(255,255,255,0.05)] file:border-0 file:rounded-lg file:px-3 file:py-1.5 file:text-sm file:text-[#F1F1F6]">
+                            </div>
+                        </div>
+                        <div class="flex justify-end pt-4">
+                            <button type="submit" class="btn-primary">Save Changes</button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
 </div>
-
-
-<div class="contact-box-main">
-    <div class="container">
-        <div class="row">
-            <div class="col-md-4 mb-4">
-                <div class="card text-center">
-                    <div class="card-body">
-                        <label for="profile-image-upload" style="cursor: pointer;">
-                            <img src="{{ Auth::user()->getFirstMediaUrl('image') ?: asset('front/images/img-pro-01.jpg') }}"
-                                class="rounded-circle mb-3" width="120" loading="lazy" height="120"
-                                alt="User Image"title="Click to change image">
-                        </label>
-                        <input type="file" id="profile-image-upload" accept="image/*" style="display: none;">
-
-                        <h4>{{ Auth::user()->name }}</h4>
-                        <p class="text-muted">Full Stack Developer<br>Bay Area, San Francisco, CA</p>
-                        <a href="{{ route('logout') }}" class="btn btn-primary btn-sm">Logout</a>
-                        <a href="{{ route('wishlist.index', ['lang' => $langCode]) }}"
-                            class="btn btn-outline-secondary btn-sm">Wishlist</a>
-                        <a href="{{ route('orders.index', ['lang' => $langCode]) }}"
-                            class="btn btn-outline-primary btn-sm">My Orders</a>
-                        <hr>
-                        <ul class="list-unstyled text-left">
-                            <li><i class="fas fa-globe mr-2"></i> Website: <a href="#">yourwebsite.com</a></li>
-                            <li><i class="fab fa-github mr-2"></i> Github: yourgithub</li>
-                            <li><i class="fab fa-twitter mr-2"></i> Twitter: @yourhandle</li>
-                            <li><i class="fab fa-instagram mr-2"></i> Instagram: yourinsta</li>
-                            <li><i class="fab fa-facebook mr-2"></i> Facebook: yourfb</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-8">
-                <div class="card">
-                    <div class="card-header bg-primary text-white">
-                        <strong>My Profile</strong>
-                        <button id="edit-btn" class="btn btn-light btn-sm float-right">Edit</button>
-                    </div>
-                    <div class="card-body">
-                        <form id="profile-form"
-                            action="{{ route('profile.update', ['lang' => $langCode, 'id' => Auth::user()->id]) }}"
-                            method="POST" enctype="multipart/form-data">
-                            @csrf
-                            @method('PUT')
-
-                            <div class="form-group row">
-                                <label class="col-sm-3 col-form-label">Full Name</label>
-                                <div class="col-sm-9">
-                                    <input type="text" name="name" value="{{ Auth::user()->name }}"
-                                        class="form-control" disabled>
-                                </div>
-                            </div>
-
-                            <div class="form-group row">
-                                <label class="col-sm-3 col-form-label">Email</label>
-                                <div class="col-sm-9">
-                                    <input type="email" name="email" value="{{ Auth::user()->email }}"
-                                        class="form-control" disabled>
-                                </div>
-                            </div>
-
-                            <div class="form-group row">
-                                <label class="col-sm-3 col-form-label">Phone</label>
-                                <div class="col-sm-9">
-                                    <input type="text" name="phone" value="{{ Auth::user()->phone }}"
-                                        class="form-control" disabled>
-                                </div>
-                            </div>
-
-                            <div class="text-right">
-                                <button type="submit" id="save-btn" class="btn btn-success d-none">Save
-                                    Changes</button>
-
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-    </div>
-</div>
-
-<!-- Script to toggle editable form -->
-<script>
-    document.getElementById('edit-btn').addEventListener('click', function() {
-        const form = document.getElementById('profile-form');
-        form.querySelectorAll('input').forEach(el => el.removeAttribute('disabled'));
-        document.getElementById('save-btn').classList.remove('d-none');
-        this.classList.add('d-none');
-    });
-</script>
-<script>
-    document.getElementById('profile-image-upload').addEventListener('change', function() {
-        const file = this.files[0];
-        if (!file) return;
-
-        const formData = new FormData();
-        formData.append('image', file);
-        formData.append('_token', '{{ csrf_token() }}');
-
-        fetch("{{ route('profile.image.upload', ['lang' => $langCode]) }}", {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    // Update image without refresh
-                    document.querySelector('label[for="profile-image-upload"] img').src = data.image_url +
-                        '?v=' + new Date().getTime();
-                    alert("Image updated successfully");
-                } else {
-                    alert("Image update failed");
-                }
-            })
-            .catch(error => {
-                alert("An error occurred while uploading.");
-                console.error(error);
-            });
-    });
-</script>
-
-@include('includes.footer')
+@endsection
