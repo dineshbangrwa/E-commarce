@@ -27,7 +27,7 @@
                     <div class="space-y-1">
                         @foreach (category() as $cat)
                             @if ($cat->subcategories->count())
-                            <div x-data="{ open: {{ request()->is('category/' . $cat->url_key) ? 'true' : 'false'} } }">
+                            <div x-data="{ open: {{ request()->is('category/' . $cat->url_key) ? 'true' : 'false' }} }">
                                 <button @click="open = !open"
                                     class="flex items-center justify-between w-full px-3 py-2 text-sm rounded-lg transition-colors {{ request()->is('category/' . $cat->url_key) ? 'text-white bg-[rgba(108,59,241,0.15)]' : 'text-[#9CA3AF] hover:text-white hover:bg-[rgba(255,255,255,0.05)]' }}">
                                     {{ $cat->name }}
