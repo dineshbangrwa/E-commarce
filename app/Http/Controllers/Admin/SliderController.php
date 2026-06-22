@@ -3,11 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\Slider;
+use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Yajra\DataTables\DataTables;
-
 
 class SliderController extends Controller
 {
@@ -22,7 +21,8 @@ class SliderController extends Controller
             return DataTables::of($data)
                 ->addIndexColumn()
                 ->addcolumn('image', function ($row) {
-                    $image = '<img id="preview" src="' . $row->getFirstMediaUrl('image') . '" alt="Current Image" style="max-width: 110px; margin-top: 10px;">';
+                    $image = '<img id="preview" src="'.$row->getFirstMediaUrl('image').'" alt="Current Image" style="max-width: 110px; margin-top: 10px;">';
+
                     return $image;
                 })
 
@@ -32,18 +32,20 @@ class SliderController extends Controller
                     $deleteUrl = route('slider.destroy', $row->id);
 
                     $btn = '<div class="d-flex gap-2 text-nowrap">
-                <a href="' . $editUrl . '" class="btn btn-sm btn-primary">Edit</a>
-                <a href="' . $switch . '" class="btn btn-sm btn-primary">Switch lan.</a>
-                <form action="' . $deleteUrl . '" method="POST" style="display:inline;">
-                    ' . csrf_field() . method_field('DELETE') . '
+                <a href="'.$editUrl.'" class="btn btn-sm btn-primary">Edit</a>
+                <a href="'.$switch.'" class="btn btn-sm btn-primary">Switch lan.</a>
+                <form action="'.$deleteUrl.'" method="POST" style="display:inline;">
+                    '.csrf_field().method_field('DELETE').'
                     <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm(\'Are you sure?\')">Delete</button>
                 </form>
             </div>';
+
                     return $btn;
                 })
                 ->rawColumns(['action', 'image'])
                 ->make(true);
         }
+
         return view('Admin.Slider.index');
     }
 
@@ -74,6 +76,7 @@ class SliderController extends Controller
         if ($request->hasfile('image') && $request->file('image')) {
             $slider->addMediaFromRequest('image')->toMediaCollection('image');
         }
+
         return redirect()->route('slider.index')->with('success', 'Slider will be Created Succesfully');
     }
 
@@ -91,6 +94,7 @@ class SliderController extends Controller
     public function edit(string $id)
     {
         $slider = Slider::where('id', $id)->first();
+
         return view('Admin.Slider.edit', compact('slider'));
     }
 
@@ -119,6 +123,7 @@ class SliderController extends Controller
             }
             $slider->addMediaFromRequest('image')->toMediaCollection('image');
         }
+
         return redirect()->route('slider.index')->with('success', 'Role will be updated Succesfully');
     }
 
@@ -129,6 +134,7 @@ class SliderController extends Controller
     {
         $slider = Slider::findOrFail($id);
         $slider->delete();
+
         return redirect()->route('slider.index')->with('success', 'Role will be Delete Succesfully');
     }
 }

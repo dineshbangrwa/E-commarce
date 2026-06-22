@@ -6,14 +6,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class translation extends Model
 {
-    protected $fillable =[
-      'block_id',
-      'translated_data',  
+    protected $fillable = [
+        'block_id',
+        'translated_data',
     ];
 
     protected $casts = [
-    'translated_data' => 'array',
-];
+        'translated_data' => 'array',
+    ];
 
     public function block()
     {
@@ -25,5 +25,4 @@ class translation extends Model
     {
         return $this->belongsTo(Language::class, 'language_id');
     }
-    
 }

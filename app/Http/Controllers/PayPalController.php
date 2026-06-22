@@ -2,16 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Srmklive\PayPal\Services\PayPal as PayPalClient;
-use App\Models\Quote;
+use App\Mail\MyEmail;
 use App\Models\Order;
 use App\Models\Order_address;
 use App\Models\Order_item;
+use App\Models\Quote;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
-use App\Mail\MyEmail;
-use Illuminate\Http\RedirectResponse;
+use Srmklive\PayPal\Services\PayPal as PayPalClient;
 
 class PayPalController extends Controller
 {
@@ -49,22 +49,22 @@ class PayPalController extends Controller
             ? Quote::where('user_id', Auth::id())->with('quoteItems')->first()
             : Quote::where('cart_id', session('cart_id'))->with('quoteItems')->first();
 
-        if (!$quote || $quote->total <= 0) {
+        if (! $quote || $quote->total <= 0) {
             return redirect()->back()->with('error', 'Cart is empty or total invalid.');
         }
 
         // Create order
         $response = $provider->createOrder([
-            "intent" => "CAPTURE",
-            "application_context" => [
-                "return_url" => route('paypal.payment.success'),
-                "cancel_url" => route('paypal.payment.cancel'),
+            'intent' => 'CAPTURE',
+            'application_context' => [
+                'return_url' => route('paypal.payment.success'),
+                'cancel_url' => route('paypal.payment.cancel'),
             ],
-            "purchase_units" => [[
-                "amount" => [
-                    "currency_code" => "USD",
-                    "value" => number_format($quote->total, 2, '.', ''),
-                ]
+            'purchase_units' => [[
+                'amount' => [
+                    'currency_code' => 'USD',
+                    'value' => number_format($quote->total, 2, '.', ''),
+                ],
             ]],
         ]);
 
@@ -97,7 +97,7 @@ class PayPalController extends Controller
                 ? Quote::where('user_id', $user->id)->with('quoteItems')->first()
                 : Quote::where('cart_id', session('cart_id'))->with('quoteItems')->first();
 
-            if (!$quote || $quote->quoteItems->isEmpty()) {
+            if (! $quote || $quote->quoteItems->isEmpty()) {
                 return redirect()->route('cart')->with('error', 'Your cart is empty');
             }
 
@@ -127,7 +127,7 @@ class PayPalController extends Controller
 
             $order = Order::create($orderData);
 
-            if (!empty($orderData['address'])) {
+            if (! empty($orderData['address'])) {
                 Order_address::create([
                     'order_id' => $order->id,
                     'user_id' => $user ? $user->id : null,

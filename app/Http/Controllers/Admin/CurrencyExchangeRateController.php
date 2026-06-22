@@ -35,11 +35,12 @@ class CurrencyExchangeRateController extends Controller
                 })
 
                 ->addColumn('action', function ($row) {
-                    $btn = '<a href="' . route('exchange_rates.edit', $row->id) . '" class="btn btn-secondary">Edit</a>';
-                    $btn .= ' <form action="' . route('exchange_rates.destroy', $row->id) . '" method="POST" style="display:inline;">
-                    ' . csrf_field() . method_field('DELETE') . '
+                    $btn = '<a href="'.route('exchange_rates.edit', $row->id).'" class="btn btn-secondary">Edit</a>';
+                    $btn .= ' <form action="'.route('exchange_rates.destroy', $row->id).'" method="POST" style="display:inline;">
+                    '.csrf_field().method_field('DELETE').'
                     <button type="submit" class="btn btn-primary">Delete</button>
                 </form>';
+
                     return $btn;
                 })
 
@@ -50,16 +51,14 @@ class CurrencyExchangeRateController extends Controller
         return view('Admin.ExchangeRate.index');
     }
 
-
     /**
-
      * Show the form for creating a new exchange rate.
      */
     public function create()
     {
         $defaultCurrency = Currency::where('is_default', 1)->first();
 
-        if (!$defaultCurrency) {
+        if (! $defaultCurrency) {
             return redirect()->back()->with('error', '⚠️ Please set a default currency first.');
         }
 
@@ -90,7 +89,6 @@ class CurrencyExchangeRateController extends Controller
             'to_currency_id.different' => 'From and To currencies must be different.',
         ]);
 
-
         CurrencyExchangeRate::create([
             'from_currency_id' => $request->from_currency_id,
             'to_currency_id' => $request->to_currency_id,
@@ -102,7 +100,7 @@ class CurrencyExchangeRateController extends Controller
             ->where('to_currency_id', $request->from_currency_id)
             ->exists();
 
-        if (!$reverseExists) {
+        if (! $reverseExists) {
             CurrencyExchangeRate::create([
                 'from_currency_id' => $request->to_currency_id,
                 'to_currency_id' => $request->from_currency_id,
@@ -112,7 +110,6 @@ class CurrencyExchangeRateController extends Controller
 
         return redirect()->route('exchange_rates.index')->with('success', 'Exchange rate and reverse rate saved successfully.');
     }
-
 
     /**
      * Show the form for editing the specified exchange rate.
@@ -132,7 +129,7 @@ class CurrencyExchangeRateController extends Controller
     public function update(Request $request, string $id)
     {
         $request->validate([
-            'rate' => 'required|numeric|min:0.00001'
+            'rate' => 'required|numeric|min:0.00001',
         ]);
 
         $rate = CurrencyExchangeRate::findOrFail($id);
@@ -153,7 +150,6 @@ class CurrencyExchangeRateController extends Controller
 
         return response()->json(['success' => true]);
     }
-
 
     /**
      * Remove the specified exchange rate.

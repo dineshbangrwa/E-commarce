@@ -3,9 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\HasMedia;
-
+use Spatie\MediaLibrary\InteractsWithMedia;
 
 class Product extends Model implements HasMedia
 {
@@ -58,32 +57,35 @@ class Product extends Model implements HasMedia
             $product->combinations()->delete();
         });
     }
+
     public function attributeValues()
     {
         return $this->hasMany(AttributeValue::class);
     }
+
     public function wishlistedBy()
     {
         return $this->hasMany(Wishlist::class);
     }
+
     public function reviews()
     {
         return $this->hasMany(Review::class);
     }
+
     //  public function translations()
     // {
     //     return $this->hasMany(ProTranslation::class, 'product_id');
     // }
     public function getNameAttribute($value)
-{
-    $langCode = session('language_code', config('app.locale'));
-    $translation = \App\Models\ProLanguage::where('product_id', $this->id)->first();
+    {
+        $langCode = session('language_code', config('app.locale'));
+        $translation = ProLanguage::where('product_id', $this->id)->first();
 
-    if ($translation && isset($translation->translated_data[$langCode]['name'])) {
-        return $translation->translated_data[$langCode]['name'];
+        if ($translation && isset($translation->translated_data[$langCode]['name'])) {
+            return $translation->translated_data[$langCode]['name'];
+        }
+
+        return $value; // original name जब translation न मिले
     }
-
-    return $value; // original name जब translation न मिले
-}
-
 }

@@ -3,11 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Currency;
 use Illuminate\Http\Request;
 use Yajra\DataTables\DataTables;
-use App\Models\Currency;
-use App\Models\CurrencyExchangeRate;
-
 
 class CurrencyController extends Controller
 {
@@ -19,16 +17,17 @@ class CurrencyController extends Controller
         if ($request->ajax()) {
 
             $data = Currency::select('*');
-            return Datatables::of($data)
+
+            return DataTables::of($data)
 
                 ->addIndexColumn()
 
                 ->addColumn('action', function ($row) {
 
-                    $btn = '<a href="' . route('currency.edit', $row->id) . '"  class="btn btn-secondary">edit</a>';
-                    $btn .= ' <form action="' . route('currency.destroy', $row->id) . '" method="POST" style="display:inline;">
-                        ' . csrf_field() . '
-                        ' . method_field('DELETE') . '
+                    $btn = '<a href="'.route('currency.edit', $row->id).'"  class="btn btn-secondary">edit</a>';
+                    $btn .= ' <form action="'.route('currency.destroy', $row->id).'" method="POST" style="display:inline;">
+                        '.csrf_field().'
+                        '.method_field('DELETE').'
                         <button type="submit" class="btn btn-primary">Delete</button>
                         </form>';
 
@@ -39,6 +38,7 @@ class CurrencyController extends Controller
 
                 ->make(true);
         }
+
         return view('Admin.Currency.index');
     }
 
@@ -62,6 +62,7 @@ class CurrencyController extends Controller
             'is_default' => $request->is_default,
         ];
         Currency::create($request);
+
         return redirect()->route('currency.index');
     }
 
@@ -94,7 +95,8 @@ class CurrencyController extends Controller
      */
     public function destroy(string $id)
     {
-        Currency::where('id',$id)->delete();
+        Currency::where('id', $id)->delete();
+
         return redirect()->route('currency.index');
     }
 }

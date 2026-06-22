@@ -2,20 +2,19 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Models\Category;
 use App\Models\Product;
 use App\Models\Slider;
-use App\Models\Category;
 use App\Models\SlidLanguage;
+use Illuminate\Http\Request;
 
 class SearchController extends Controller
 {
-
-    public function search(Request $request,$lang)
+    public function search(Request $request, $lang)
     {
-        
-      app()->setLocale($lang);
-    $langCode = session('language_code', 'en');
+
+        app()->setLocale($lang);
+        $langCode = session('language_code', 'en');
 
         $sliders = Slider::all();
         $sliders->transform(function ($slider) use ($langCode) {
@@ -25,6 +24,7 @@ class SearchController extends Controller
                 $slider->title = $data['title'] ?? $slider->title;
                 $slider->description = $data['description'] ?? $slider->description;
             }
+
             return $slider;
         });
         $query = $request->input('query');
@@ -37,6 +37,7 @@ class SearchController extends Controller
                 $q->where('name', 'LIKE', "%{$query}%");
             })
             ->get();
+
         return view('search', compact('products', 'query', 'sliders'));
     }
 }

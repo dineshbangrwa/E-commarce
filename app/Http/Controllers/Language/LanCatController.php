@@ -55,6 +55,7 @@ class LanCatController extends Controller
 
         if ($translation && isset($translation->translated_data[$langCode])) {
             $data = $translation->translated_data[$langCode];
+
             return response()->json([
                 'name' => $data['name'] ?? $category->name,
                 'description' => $data['description'] ?? $category->description,

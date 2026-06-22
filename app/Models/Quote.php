@@ -22,6 +22,7 @@ class Quote extends Model
         'coupon_discount',
         'total',
     ];
+
     public function quoteItems()
     {
         return $this->hasMany(Quote_item::class, 'quote_id', 'id');

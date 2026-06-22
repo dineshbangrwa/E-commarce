@@ -2,22 +2,20 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\Quote;
-use App\Models\Quote_item;
-use Illuminate\Support\Facades\Auth;
-use App\Models\Order_address;
-use App\Models\Order;
-use App\Models\Order_item;
-use Illuminate\Support\Facades\Log;
-use App\Models\Attributevalue;
-use App\Models\AttributeCombination;
-use Illuminate\Support\Facades\Mail;
 use App\Mail\MyEmail;
-use Illuminate\View\View;
+use App\Models\AttributeCombination;
+use App\Models\Attributevalue;
+use App\Models\Order;
+use App\Models\Order_address;
+use App\Models\Order_item;
+use App\Models\Quote;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\View\View;
 use Stripe\Checkout\Session as StripeSession;
-
 use Stripe\Stripe;
 
 class StripeController extends Controller
@@ -37,7 +35,7 @@ class StripeController extends Controller
     public function stripePost(Request $request): RedirectResponse
     {
 
-         $request->validate([
+        $request->validate([
             'name' => 'required|string|max:255',
             'phone' => 'required|string|max:20',
             'email' => 'required|email|max:255',
@@ -51,14 +49,14 @@ class StripeController extends Controller
             'sameBillingShipping' => 'nullable|boolean',
             'save_info' => 'nullable|boolean',
         ]);
-        
+
         Stripe::setApiKey(env('STRIPE_SECRET'));
 
         $quote = Auth::check()
             ? Quote::where('user_id', Auth::id())->with('quoteItems')->first()
             : Quote::where('cart_id', session('cart_id'))->with('quoteItems')->first();
 
-        if (!$quote || $quote->total <= 0) {
+        if (! $quote || $quote->total <= 0) {
             return redirect()->back()->with('error', 'Cart total is invalid or empty.');
         }
 
@@ -68,14 +66,14 @@ class StripeController extends Controller
                 'price_data' => [
                     'currency' => 'inr',
                     'product_data' => [
-                        'name' => 'Order from ' . $request->name,
+                        'name' => 'Order from '.$request->name,
                     ],
                     'unit_amount' => intval($quote->total * 100), // make sure it's integer
                 ],
                 'quantity' => 1,
             ]],
             'mode' => 'payment',
-            'success_url' => route('checkout.success') . '?session_id={CHECKOUT_SESSION_ID}',
+            'success_url' => route('checkout.success').'?session_id={CHECKOUT_SESSION_ID}',
             'cancel_url' => route('checkout.cancel'),
             'metadata' => array_merge(
                 $request->except('_token'),
@@ -88,6 +86,7 @@ class StripeController extends Controller
 
         return redirect($session->url);
     }
+
     public function success(Request $request)
     {
         Stripe::setApiKey(env('STRIPE_SECRET'));
@@ -100,13 +99,12 @@ class StripeController extends Controller
         $user = Auth::user();
         $cartId = session('cart_id');
 
-
         if ($user) {
             $cart = Quote::where('user_id', $user->id)->with('quoteItems')->first();
         } else {
             $cart = Quote::where('cart_id', $cartId)->with('quoteItems')->first();
         }
-        if (!$cart || $cart->quoteItems->isEmpty()) {
+        if (! $cart || $cart->quoteItems->isEmpty()) {
             return redirect()->back()->with('message', 'Your cart is empty.');
         }
 
@@ -158,7 +156,6 @@ class StripeController extends Controller
             ]);
         }
 
-
         foreach ($cart->quoteItems as $cartItem) {
             Order_item::create([
                 'order_id' => $order->id,
@@ -171,7 +168,7 @@ class StripeController extends Controller
                 'custom_option' => $cartItem->custom_option,
             ]);
 
-            if (!empty($cartItem->custom_option)) {
+            if (! empty($cartItem->custom_option)) {
                 $options = explode(',', $cartItem->custom_option);
                 foreach ($options as $option) {
                     $pair = explode(':', $option);
@@ -192,10 +189,10 @@ class StripeController extends Controller
                                 $combination->stock = max($combination->stock - $cartItem->qty, 0);
                                 $combination->save();
                             } else {
-                                Log::warning('Combination not found: product_id = ' . $cartItem->product_id . ', attribute_value_ids = ' . $attributeValue->id);
+                                Log::warning('Combination not found: product_id = '.$cartItem->product_id.', attribute_value_ids = '.$attributeValue->id);
                             }
                         } else {
-                            Log::warning('Attribute value not found for value = ' . $value);
+                            Log::warning('Attribute value not found for value = '.$value);
                         }
                     }
                 }
@@ -208,7 +205,6 @@ class StripeController extends Controller
             session()->forget('coupon_code');
             session()->forget('coupon_discount');
 
-
             $cartItem->delete();
         }
         $orderItems = Order_item::where('order_id', $order->id)->get();
@@ -219,6 +215,6 @@ class StripeController extends Controller
         // dd($user);
         $langCode = session('language_code', app()->getLocale());
 
-        return redirect()->route('lang.index',['lang' => $langCode])->with('message', 'Order placed successfully.');
+        return redirect()->route('lang.index', ['lang' => $langCode])->with('message', 'Order placed successfully.');
     }
 }

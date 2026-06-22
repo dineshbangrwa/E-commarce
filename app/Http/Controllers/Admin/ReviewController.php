@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\Review;
+use Illuminate\Http\Request;
 use Yajra\DataTables\DataTables;
 
 class ReviewController extends Controller
@@ -27,24 +27,25 @@ class ReviewController extends Controller
                 })
                 ->addColumn('action', function ($row) {
                     $approveForm = '';
-                    if (!$row->approved) {
+                    if (! $row->approved) {
                         $approveForm = '
-                        <form method="POST" action="' . route('reviews.update', $row->id) . '" style="display:inline-block; margin-right:5px;">
-                            ' . csrf_field() . method_field('PUT') . '
+                        <form method="POST" action="'.route('reviews.update', $row->id).'" style="display:inline-block; margin-right:5px;">
+                            '.csrf_field().method_field('PUT').'
                             <input type="hidden" name="approved" value="1">
                             <button type="submit" class="btn btn-sm btn-success">Approve</button>
                         </form>';
                     }
                     $btn = '
                         <div class="d-flex align-items-center" style="gap:5px;">
-                            ' . $approveForm . '
-                            <button class="btn btn-sm btn-info btn-edit" data-id="' . $row->id . '">Edit</button>
-                            <button class="btn btn-sm btn-success btn-update d-none" data-id="' . $row->id . '">Update</button>
-                            <form method="POST" action="' . route('reviews.destroy', $row->id) . '" style="display:inline;" onsubmit="return confirm(\'Delete this review?\');">
-                                ' . csrf_field() . method_field('DELETE') . '
+                            '.$approveForm.'
+                            <button class="btn btn-sm btn-info btn-edit" data-id="'.$row->id.'">Edit</button>
+                            <button class="btn btn-sm btn-success btn-update d-none" data-id="'.$row->id.'">Update</button>
+                            <form method="POST" action="'.route('reviews.destroy', $row->id).'" style="display:inline;" onsubmit="return confirm(\'Delete this review?\');">
+                                '.csrf_field().method_field('DELETE').'
                                 <button class="btn btn-sm btn-danger">Delete</button>
                             </form>
                         </div>';
+
                     return $btn;
                 })
                 ->rawColumns(['action'])
@@ -63,9 +64,7 @@ class ReviewController extends Controller
         //     'reviewer_email' => 'required_if:auth,false|email|max:100',
         // ]);
 
-
         $product = Product::findOrFail($request->product_id);
-
 
         Review::create([
             'product_id' => $product->id,
@@ -77,7 +76,6 @@ class ReviewController extends Controller
             'approved' => false,
         ]);
 
-
         return redirect()->back()->with('success', 'Review submitted and waiting for approval!');
     }
 
@@ -85,13 +83,12 @@ class ReviewController extends Controller
     {
         $review = Review::findOrFail($id);
 
-
         if ($request->has('approved')) {
             $review->approved = true;
             $review->save();
+
             return redirect()->back()->with('success', 'Review approved successfully!');
         }
-
 
         if ($request->has('comment')) {
             $request->validate([
@@ -99,9 +96,9 @@ class ReviewController extends Controller
             ]);
             $review->comment = $request->comment;
             $review->save();
+
             return response()->json(['success' => true]);
         }
-
 
         return redirect()->back();
     }
@@ -110,6 +107,7 @@ class ReviewController extends Controller
     {
         $review = Review::findOrFail($id);
         $review->delete();
+
         return redirect()->back()->with('success', 'Review deleted successfully!');
     }
 }

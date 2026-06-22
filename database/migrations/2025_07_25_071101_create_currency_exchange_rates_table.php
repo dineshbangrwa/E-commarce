@@ -9,18 +9,17 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-   public function up(): void
-{
-    Schema::create('currency_exchange_rates', function (Blueprint $table) {
-        $table->id();
-        $table->foreignId('from_currency_id')->constrained('currencies')->onDelete('cascade');
-        $table->foreignId('to_currency_id')->constrained('currencies')->onDelete('cascade');
-        $table->float('rate');
-        $table->timestamps();
+    public function up(): void
+    {
+        Schema::create('currency_exchange_rates', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('from_currency_id')->constrained('currencies')->onDelete('cascade');
+            $table->foreignId('to_currency_id')->constrained('currencies')->onDelete('cascade');
+            $table->float('rate');
+            $table->timestamps();
 
-        $table->unique(['from_currency_id', 'to_currency_id']);
-    });
-
+            $table->unique(['from_currency_id', 'to_currency_id']);
+        });
 
     }
 

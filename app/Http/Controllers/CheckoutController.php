@@ -2,18 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\Quote;
-use App\Models\Quote_item;
-use Illuminate\Support\Facades\Auth;
-use App\Models\Order_address;
-use App\Models\Order;
-use App\Models\Order_item;
-use Illuminate\Support\Facades\Log;
-use App\Models\Attributevalue;
-use App\Models\AttributeCombination;
-use Illuminate\Support\Facades\Mail;
 use App\Mail\MyEmail;
+use App\Models\AttributeCombination;
+use App\Models\Attributevalue;
+use App\Models\Order;
+use App\Models\Order_address;
+use App\Models\Order_item;
+use App\Models\Quote;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class CheckoutController extends Controller
 {
@@ -33,25 +32,26 @@ class CheckoutController extends Controller
 
         return view('checkout', compact('quote'));
     }
+
     public function store(Request $request)
     {
         // dd($request->all());
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'phone' => 'required|string|max:20',
-            'email' => 'required|email|max:255',
-            'address' => 'required|string|max:500',
-            'address_2' => 'nullable|string|max:500',
-            'country' => 'required',
-            'state' => 'required',
-            'city' => 'required',
-            'pin_code' => 'required|string|max:10',
-            'payment_method' => 'required|in:stripe,cod',
-            'sameBillingShipping' => 'nullable|boolean',
-            'save_info' => 'nullable|boolean',
-        ]);
+        // $request->validate([
+        //     'name' => 'required|string|max:255',
+        //     'phone' => 'required|string|max:20',
+        //     'email' => 'required|email|max:255',
+        //     'address' => 'required|string|max:500',
+        //     'address_2' => 'nullable|string|max:500',
+        //     'country' => 'required',
+        //     'state' => 'required',
+        //     'city' => 'required',
+        //     'pin_code' => 'required|string|max:10',
+        //     'payment_method' => 'required|in:stripe,cod',
+        //     'sameBillingShipping' => 'nullable|boolean',
+        //     'save_info' => 'nullable|boolean',
+        // ]);
 
-        $data = $request->all();
+        // $data = $request->all();
         $user = Auth::user();
         $cartId = session('cart_id');
 
@@ -60,7 +60,7 @@ class CheckoutController extends Controller
         } else {
             $cart = Quote::where('cart_id', $cartId)->with('quoteItems')->first();
         }
-        if (!$cart || $cart->quoteItems->isEmpty()) {
+        if (! $cart || $cart->quoteItems->isEmpty()) {
             return redirect()->back()->with('message', 'Your cart is empty.');
         }
 
@@ -70,7 +70,7 @@ class CheckoutController extends Controller
         $orderdata = [
             'order_increment_id' => $orderIncrementId,
             'user_id' => $user->id,
-            'name' => $request->name,
+            'name' => trim($request->firstname . ' ' . $request->lastname),
             'email' => $request->email,
             'phone' => $request->phone,
             'address' => $request->address,
@@ -78,15 +78,15 @@ class CheckoutController extends Controller
             'city' => $request->city,
             'state' => $request->state,
             'country' => $request->country,
-            'pincode' => $request->pin_code,
+            'pincode' => $request->pin_code ?? '',
             'coupon' => $cart->coupon ?? '',
             'coupon_discount' => $cart->coupon_discount ?? '',
             'subtotal' => $cart->subtotal ?? 0,
             'total' => $cart->total ?? 0,
         ];
 
+        // dd($orderdata);
         $order = Order::create($orderdata);
-        // dd($order);
 
         $cart->update([
             'subtotal' => 0,
@@ -94,7 +94,7 @@ class CheckoutController extends Controller
         ]);
 
         if ($request->sameBillingShipping == 1) {
-            if (!$request->name || !$request->address) {
+            if (! $request->name || ! $request->address) {
                 dd('Billing info missing:', $request->all());
             }
 
@@ -114,7 +114,6 @@ class CheckoutController extends Controller
             ]);
         }
 
-
         foreach ($cart->quoteItems as $cartItem) {
             Order_item::create([
                 'order_id' => $order->id,
@@ -127,7 +126,7 @@ class CheckoutController extends Controller
                 'custom_option' => $cartItem->custom_option,
             ]);
 
-            if (!empty($cartItem->custom_option)) {
+            if (! empty($cartItem->custom_option)) {
                 $options = explode(',', $cartItem->custom_option); // Example: "Color:White,Size:M"
 
                 foreach ($options as $option) {
@@ -152,10 +151,10 @@ class CheckoutController extends Controller
                                 $combination->stock = max($combination->stock - $cartItem->qty, 0);
                                 $combination->save();
                             } else {
-                                Log::warning('Combination not found: product_id = ' . $cartItem->product_id . ', attribute_value_ids = ' . $attributeValue->id);
+                                Log::warning('Combination not found: product_id = '.$cartItem->product_id.', attribute_value_ids = '.$attributeValue->id);
                             }
                         } else {
-                            Log::warning('Attribute value not found for value = ' . $value);
+                            Log::warning('Attribute value not found for value = '.$value);
                         }
                     }
                 }
@@ -169,7 +168,6 @@ class CheckoutController extends Controller
             session()->forget('coupon_code');
             session()->forget('coupon_discount');
 
-
             $cartItem->delete();
         }
         $orderItems = Order_item::where('order_id', $order->id)->get();
@@ -177,6 +175,7 @@ class CheckoutController extends Controller
         Mail::to('dineshkumarbangrwa55@gmail.com')->send(new MyEmail($user, $order, $orderItems));
         // dd($user);
         $langCode = session('language_code', app()->getLocale());
+
         return redirect()->route('lang.index', ['lang' => $langCode])->with('message', 'Order placed successfully.');
     }
 }

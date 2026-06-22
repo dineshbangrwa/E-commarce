@@ -14,24 +14,26 @@ class EnquiryController extends Controller
      */
     public function index(Request $request)
     {
-         if ($request->ajax()) {
-        $data = Enquiry::query();
+        if ($request->ajax()) {
+            $data = Enquiry::query();
 
-        return DataTables::of($data)
-            ->addIndexColumn()  
-  
-            ->addColumn('action', function ($row) {
-                $btn = '<a href="' . route('enquiry.edit', $row->id) . '"  class="btn btn-secondary">Edit</a>';
-                $btn .= ' <form action="' . route('enquiry.destroy', $row->id) . '" method="POST" style="display:inline;">
-                    ' . csrf_field() . method_field('DELETE') . '
+            return DataTables::of($data)
+                ->addIndexColumn()
+
+                ->addColumn('action', function ($row) {
+                    $btn = '<a href="'.route('enquiry.edit', $row->id).'"  class="btn btn-secondary">Edit</a>';
+                    $btn .= ' <form action="'.route('enquiry.destroy', $row->id).'" method="POST" style="display:inline;">
+                    '.csrf_field().method_field('DELETE').'
                     <button type="submit" class="btn btn-danger">Delete</button>
                     </form>';
-                return $btn;
-            })
-            ->rawColumns(['action'])
-            ->make(true);
-    }
-        return view('Admin.Enquiry.index')->with('success','Enquiry added successfully');;
+
+                    return $btn;
+                })
+                ->rawColumns(['action'])
+                ->make(true);
+        }
+
+        return view('Admin.Enquiry.index')->with('success', 'Enquiry added successfully');
     }
 
     /**
@@ -48,14 +50,15 @@ class EnquiryController extends Controller
     public function store(Request $request)
     {
         // dd($request->all());
-        $insert =[
-            'name'=>$request->name,
-            'email'=>$request->email,
-            'phone'=>$request->phone,
-            'message'=>$request->message,
+        $insert = [
+            'name' => $request->name,
+            'email' => $request->email,
+            'phone' => $request->phone,
+            'message' => $request->message,
         ];
         Enquiry::create($insert);
-        return redirect()->route('enquiry.index')->with('success','Enquiry added successfully');
+
+        return redirect()->route('enquiry.index')->with('success', 'Enquiry added successfully');
 
     }
 
@@ -72,8 +75,9 @@ class EnquiryController extends Controller
      */
     public function edit(string $id)
     {
-        $enquiry =Enquiry::where('id',$id)->first();
-        return view('admin.enquiry.edit',compact('enquiry'));
+        $enquiry = Enquiry::where('id', $id)->first();
+
+        return view('admin.enquiry.edit', compact('enquiry'));
     }
 
     /**
@@ -81,22 +85,24 @@ class EnquiryController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $update =[
-            'name'=>$request->name,
-            'email'=>$request->email,
-            'phone'=>$request->phone,
-            'message'=>$request->message,
+        $update = [
+            'name' => $request->name,
+            'email' => $request->email,
+            'phone' => $request->phone,
+            'message' => $request->message,
         ];
-        Enquiry::where('id',$id)->update($update);
-        return redirect()->route('enquiry.index')->with('success','Enquiry update successfully');;
+        Enquiry::where('id', $id)->update($update);
+
+        return redirect()->route('enquiry.index')->with('success', 'Enquiry update successfully');
     }
-    
+
     /**
      * Remove the specified resource from storage.
      */
     public function destroy(string $id)
     {
-        Enquiry::where('id',$id)->delete();
-        return redirect()->route('enquiry.index')->with('success','Enquiry Delete successfully');;
+        Enquiry::where('id', $id)->delete();
+
+        return redirect()->route('enquiry.index')->with('success', 'Enquiry Delete successfully');
     }
 }

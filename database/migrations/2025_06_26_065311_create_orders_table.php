@@ -13,24 +13,24 @@ return new class extends Migration
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
-            $table->integer('order_increment_id');  
-            $table->integer('user_id');  
-            $table->string('name');  
-            $table->string('email'); 
-            $table->string('phone');  
-            $table->text('address');  
-            $table->text('address_2');  
-            $table->string('city');  
-            $table->string('state'); 
-            $table->string('country');  
-            $table->string('pincode');  
-            $table->string('coupon');  
-            $table->double('coupon_discount');  
-            $table->double('total', 10, 2);  
-            $table->string('payment_method');  
-            $table->string('shipping_method');  
+            $table->integer('order_increment_id');
+            $table->integer('user_id');
+            $table->string('name');
+            $table->string('email');
+            $table->string('phone');
+            $table->text('address');
+            $table->text('address_2');
+            $table->string('city');
+            $table->string('state');
+            $table->string('country');
+            $table->string('pincode');
+            $table->string('coupon');
+            $table->double('coupon_discount');
+            $table->double('total', 10, 2);
+            $table->string('payment_method');
+            $table->string('shipping_method');
             $table->string('shipping_cost');
-            $table->string('subtotal'); 
+            $table->string('subtotal');
             $table->timestamps();
         });
     }

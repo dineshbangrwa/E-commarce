@@ -11,7 +11,8 @@ class CurrencyExchangeRate extends Model
         'to_currency_id',
         'rate',
     ];
-     public function fromCurrency()
+
+    public function fromCurrency()
     {
         return $this->belongsTo(Currency::class, 'from_currency_id');
     }

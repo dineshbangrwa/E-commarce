@@ -1,47 +1,43 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Admin\DashboardController;
-use App\Http\Controllers\Admin\UserController;
-use App\Http\Controllers\Admin\SliderController;
 use App\Http\Controllers\Admin\BlockController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\CouponController;
+use App\Http\Controllers\Admin\CurrencyController;
+use App\Http\Controllers\Admin\CurrencyExchangeRateController;
+use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\EnquiryController;
 use App\Http\Controllers\Admin\PageController;
 use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\Admin\ReviewController;
 use App\Http\Controllers\Admin\RoleController;
-use App\Http\Controllers\HomeController;
-use App\Http\Controllers\LoginController;
-use App\Http\Controllers\CustomLoginController;
-use App\Http\Controllers\CartController;
-use App\Http\Controllers\CheckoutController;
-use App\Http\Controllers\SearchController;
-use App\Http\Controllers\WishlistController;
-use App\Http\Controllers\StripeController;
+use App\Http\Controllers\Admin\SliderController;
+use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\BuyController;
 use App\Http\Controllers\BuyNowController;
-use App\Http\Controllers\Admin\CurrencyController;
-use App\Http\Controllers\Admin\CurrencyExchangeRateController;
-use App\Http\Controllers\Admin\ReviewController;
-use App\Http\Controllers\Language\BlockTranslationController;
+use App\Http\Controllers\CartController;
+use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\CustomLoginController;
 use App\Http\Controllers\FCurrencyController;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\Language\BlockTranslationController;
 use App\Http\Controllers\Language\LanCatController;
 use App\Http\Controllers\Language\LanguageController;
 use App\Http\Controllers\Language\LanPageController;
 use App\Http\Controllers\Language\LanProductController;
 use App\Http\Controllers\Language\LanSliderController;
+use App\Http\Controllers\LoginController;
 use App\Http\Controllers\PayPalController;
-use Laravel\Socialite\Facades\Socialite;
+use App\Http\Controllers\SearchController;
+use App\Http\Controllers\StripeController;
+use App\Http\Controllers\WishlistController;
 use App\Models\User;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-
-
-
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Str;
+use Laravel\Socialite\Facades\Socialite;
 
 // Route::get('wellcome',function() {
 //     return view('welcome');
@@ -49,6 +45,7 @@ use Illuminate\Support\Facades\DB;
 
 Route::get('/', function () {
     $lang = session('language_code', config('app.locale', 'en'));
+
     return redirect()->route('index', ['lang' => $lang]);
 });
 Route::get('/', [HomeController::class, 'index'])->name('index');
@@ -68,7 +65,8 @@ Route::group(['prefix' => '{lang}', 'where' => ['lang' => '[a-zA-Z]{2}'], 'middl
         Route::get('/my-orders/{order}', [HomeController::class, 'show'])->name('orders.show');
         Route::get('/wishlist', [WishlistController::class, 'showWishlist'])->name('wishlist.index');
         Route::get('/wishlist/add/{id}', [WishlistController::class, 'addToWishlist'])->name('wishlist.add');
-        Route::get('/wishlist/remove/{id}', [WishlistController::class, 'removeFromWishlist'])->name('wishlist.remove');
+        Route::delete('/wishlist/remove/{id}', [WishlistController::class, 'removeFromWishlist'])
+    ->name('wishlist.remove');
     });
 
     Route::get('profile', [CustomLoginController::class, 'profile'])->name('profile');
@@ -90,7 +88,6 @@ Route::group(['prefix' => '{lang}', 'where' => ['lang' => '[a-zA-Z]{2}'], 'middl
 Route::post('checkout', [CheckoutController::class, 'store'])->name('checkout.store');
 Route::post('buycheckout', [BuyController::class, 'buystore'])->name('checkout.buy');
 
-
 Route::controller(StripeController::class)->group(function () {
     Route::post('stripe', [StripeController::class, 'stripePost'])->name('stripe.post');
     Route::get('/checkout/success', [StripeController::class, 'success'])->name('checkout.success');
@@ -107,7 +104,7 @@ Route::get('/auth/callback', function () {
     $googleUser = Socialite::driver('google')->stateless()->user();
 
     $user = User::where('email', $googleUser->email)->first();
-    if (!$user) {
+    if (! $user) {
         $user = User::create([
             'name' => $googleUser->name,
             'email' => $googleUser->email,
@@ -120,9 +117,9 @@ Route::get('/auth/callback', function () {
         }
     }
     Auth::login($user);
+
     return redirect()->route('index')->with('message', 'Login successful via Google');
 });
-
 
 Route::delete('/cart/remove/{id}', [CartController::class, 'remove'])->name('remove');
 
@@ -136,7 +133,6 @@ Route::controller(BuyNowController::class)->group(function () {
     Route::get('/buy/checkout/success', [BuyNowController::class, 'buysuccess'])->name('buy.success');
     Route::get('buy/checkout/cancel', [BuyNowController::class, 'buycancel'])->name('buy.cancel');
 });
-
 
 // ADMIN ROUTES =========
 Route::get('admin_login', [LoginController::class, 'login'])->name('admin.login');
@@ -167,10 +163,7 @@ Route::get('sitemap.xml', function () {
     return response()->file(public_path('sitemap.xml'));
 });
 
-
 Route::post('/language/change', [LanguageController::class, 'change'])->name('language.change');
-
-
 
 // Block Translation
 Route::get('/lang/block/{id}', [BlockTranslationController::class, 'index'])->name('lang.switch.block');
@@ -187,19 +180,16 @@ Route::get('/lang/slider/{id}', [LanSliderController::class, 'index'])->name('la
 Route::get('/slider/translation/{id}', [LanSliderController::class, 'getTranslation']);
 Route::post('/slider/translation/{sliderId}', [LanSliderController::class, 'storeTranslation']);
 
-
 // =====Page lang=============
 Route::get('/lang/page/{id}', [LanPageController::class, 'index'])->name('lang.switch.page');
 Route::get('/page/translation/{id}', [LanPageController::class, 'getTranslation']);
 Route::post('/page/translation/{pageId}', [LanPageController::class, 'storeTranslation']);
-
 
 // ============Category========
 Route::get('/lang/category/{id}', [LanCatController::class, 'index'])->name('lang.switch.category');
 Route::get('/category/translation/{id}', [LanCatController::class, 'getTranslation']);
 Route::post('/category/translation/{categoryId}', [LanCatController::class, 'storeTranslation']);
 
-  
 // Route::get('paypal', [PayPalController::class, 'index'])->name('paypal');
 // Route::get('paypal/payment', [PayPalController::class, 'payment'])->name('paypal.payment');
 // Route::get('paypal/payment/success', [PayPalController::class, 'paymentSuccess'])->name('paypal.payment.success');

@@ -6,19 +6,19 @@ use Illuminate\Database\Eloquent\Model;
 
 class Order_address extends Model
 {
-      protected $fillable = [
+    protected $fillable = [
 
         'order_id',
         'user_id',
-       'name',
-       'email',
-       'phone',
-       'address',
-       'address-2',
-       'city',
-       'state',
-       'country',
-       'pincode',
-       'address_type',
+        'name',
+        'email',
+        'phone',
+        'address',
+        'address-2',
+        'city',
+        'state',
+        'country',
+        'pincode',
+        'address_type',
     ];
 }

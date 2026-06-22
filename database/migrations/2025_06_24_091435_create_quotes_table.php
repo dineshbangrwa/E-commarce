@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('cart_id');
             $table->integer('user_id');
             $table->string('name')->nullable();
-            $table->string('email')->nullable();;
+            $table->string('email')->nullable();
             $table->string('phone')->nullable();
             $table->text('address')->nullable();
             $table->string('city')->nullable();

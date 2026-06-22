@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('page_languages', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('page_id'); 
-            $table->foreign('page_id')->references('id')->on('pages')->onDelete('cascade'); 
+            $table->unsignedBigInteger('page_id');
+            $table->foreign('page_id')->references('id')->on('pages')->onDelete('cascade');
             $table->json('translated_data');
             $table->timestamps();
         });

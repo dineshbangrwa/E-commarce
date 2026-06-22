@@ -1,11 +1,10 @@
 <?php
 
-
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\Slider;
+use Illuminate\Http\Request;
 
 class SliderController extends Controller
 {
@@ -27,6 +26,7 @@ class SliderController extends Controller
 
         return response()->json(['data' => $data], 200);
     }
+
     /**
      * Show the form for creating a new resource.
      */
@@ -44,6 +44,7 @@ class SliderController extends Controller
         if ($request->hasFile('image') && $request->file('image')->isValid()) {
             $slider->addMediaFromRequest('image')->toMediaCollection('image');
         }
+
         return response()->json(['status' => $slider], 201);
     }
 
@@ -69,6 +70,7 @@ class SliderController extends Controller
     public function update(Request $request, string $id)
     {
         Slider::where('id', $id)->update($request->all());
+
         return response()->json(['status' => 'success']);
     }
 
@@ -78,6 +80,7 @@ class SliderController extends Controller
     public function destroy(string $id)
     {
         Slider::where('id', $id)->delete();
+
         return response()->json(['status' => 'success']);
     }
 }

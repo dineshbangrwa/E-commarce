@@ -5,8 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use Illuminate\Http\Request;
-use Yajra\DataTables\DataTables;
 use Illuminate\Support\Str;
+use Yajra\DataTables\DataTables;
 
 class CategoryController extends Controller
 {
@@ -23,7 +23,7 @@ class CategoryController extends Controller
 
                 ->addColumn('image', function ($row) {
                     return $row->getFirstMediaUrl('image')
-                        ? '<img src="' . $row->getFirstMediaUrl('image') . '" alt="Image" style="max-width: 70px;">'
+                        ? '<img src="'.$row->getFirstMediaUrl('image').'" alt="Image" style="max-width: 70px;">'
                         : 'No Image';
                 })
 
@@ -32,22 +32,23 @@ class CategoryController extends Controller
                     $deleteUrl = route('category.destroy', $row->id);
                     $switch = route('lang.switch.category', $row->id);
 
-
                     $btn = '<div class="d-flex gap-2 text-nowrap">
-                <a href="' . $editUrl . '" class="btn btn-sm btn-primary">Edit</a>
-                <a href="' . $switch . '" class="btn btn-sm btn-primary">Switch lan.</a>
+                <a href="'.$editUrl.'" class="btn btn-sm btn-primary">Edit</a>
+                <a href="'.$switch.'" class="btn btn-sm btn-primary">Switch lan.</a>
 
-                <form action="' . $deleteUrl . '" method="POST" style="display:inline;">
-                    ' . csrf_field() . method_field('DELETE') . '
+                <form action="'.$deleteUrl.'" method="POST" style="display:inline;">
+                    '.csrf_field().method_field('DELETE').'
                     <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm(\'Are you sure?\')">Delete</button>
                 </form>
             </div>';
+
                     return $btn;
                 })
 
                 ->rawColumns(['action', 'image'])
                 ->make(true);
         }
+
         return view('admin.category.index');
     }
 
@@ -57,6 +58,7 @@ class CategoryController extends Controller
     public function create()
     {
         $categorys = Category::all();
+
         return view('admin.category.create', compact('categorys'));
     }
 
@@ -145,13 +147,13 @@ class CategoryController extends Controller
         return redirect()->route('category.index')->with('success', 'Category will be update Succesfully');
     }
 
-
     /**
      * Remove the specified resource from storage.
      */
     public function destroy(string $id)
     {
         Category::where('id', $id)->delete();
+
         return redirect()->route('category.index')->with('success', 'Category will be Delete Succesfully');
     }
 }

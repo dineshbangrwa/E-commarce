@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Currency;
 use App\Models\CurrencyExchangeRate;
+use Illuminate\Http\Request;
 
 class FCurrencyController extends Controller
 {
@@ -15,7 +15,7 @@ class FCurrencyController extends Controller
         $defaultCurrency = Currency::where('is_default', 1)->first();
         $selectedCurrency = Currency::where('code', $selectedCode)->first();
 
-        if (!$defaultCurrency || !$selectedCurrency) {
+        if (! $defaultCurrency || ! $selectedCurrency) {
             return back()->with('error', 'Currency not found.');
         }
 
@@ -25,6 +25,7 @@ class FCurrencyController extends Controller
                 'currency_symbol' => $selectedCurrency->symbol,
                 'currency_rate' => 1,
             ]);
+
             return back();
         }
 
@@ -38,6 +39,7 @@ class FCurrencyController extends Controller
                 'currency_symbol' => $selectedCurrency->symbol,
                 'currency_rate' => $directRate,
             ]);
+
             return back();
         }
 
@@ -51,6 +53,7 @@ class FCurrencyController extends Controller
                 'currency_symbol' => $selectedCurrency->symbol,
                 'currency_rate' => 1 / $reverseRate,
             ]);
+
             return back();
         }
 

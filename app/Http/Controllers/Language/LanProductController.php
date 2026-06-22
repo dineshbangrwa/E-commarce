@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Language;
 
 use App\Http\Controllers\Controller;
-use App\Models\Product;
 use App\Models\Language;
+use App\Models\Product;
 use App\Models\ProLanguage;
 use Illuminate\Http\Request;
 
@@ -17,6 +17,7 @@ class LanProductController extends Controller
 
         return view('Language.product', compact('product', 'languages'));
     }
+
     public function storeTranslation(Request $request, $productId)
     {
         // dd($request->all());
@@ -41,7 +42,6 @@ class LanProductController extends Controller
         return response()->json(['message' => 'Translation saved successfully']);
     }
 
-
     public function getTranslation($productId)
     {
         $langCode = request('lang');
@@ -50,6 +50,7 @@ class LanProductController extends Controller
 
         if ($translation && isset($translation->translated_data[$langCode])) {
             $data = $translation->translated_data[$langCode];
+
             return response()->json([
                 'name' => $data['name'] ?? $product->name,
                 'description' => $data['description'] ?? $product->description,
@@ -71,6 +72,7 @@ class LanProductController extends Controller
         ]);
         $lang = $request->lang;
         session(['language_code' => $lang]);
+
         return redirect()->route('lang.index', ['lang' => $lang]);
     }
 }

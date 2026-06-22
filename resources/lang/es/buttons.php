@@ -1,4 +1,5 @@
 <?php
+
 return [
     'shop_now' => 'Comprar Ahora',
     'Add to Cart' => 'Agregar al Carrito',
@@ -6,8 +7,8 @@ return [
     'sample_text' => ' Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed sit amet lacus enim.',
     'you_may_also_like' => 'También te puede gustar',
     'you_may_also_like_desc' => 'Estos productos están seleccionados según tus preferencias.',
-    'featured_products' => 'Produits en Vedette',
-    'featured_products_desc' => 'Voici quelques produits sélectionnés en fonction de vos préférences.',
+    'featured_products' => 'Productos Destacados',
+    'featured_products_desc' => 'Estos productos están seleccionados según tus preferencias.',
     'all' => 'Todos',
     'top_featured' => 'Destacado principal',
     'best_seller' => 'Más vendido',
@@ -43,6 +44,16 @@ return [
     'shopping_cart' => 'Carrito de compras',
     'place_order' => 'Realizar pedido',
     'same_billing_shipping' => 'La dirección de envío es la misma que la de facturación',
+    'no_items_in_cart' => 'No hay artículos en tu carrito',
+    'apply_coupon' => 'Aplicar cupón',
+    'order_summary' => 'Resumen del pedido',
+    'sub_total' => 'Subtotal',
+    'discount' => 'Descuento',
+    'coupon_discount' => 'Descuento del cupón',
+    'shipping_cost' => 'Costo de envío',
+    'free' => 'Gratis',
+    'grand_total' => 'Total general',
+    'checkout' => 'Pagar',
     'save_info_next_time' => 'Guardar esta información para la próxima vez',
     'payment' => 'Pago',
     'payment_method_stripe' => 'Método de pago Stripe',

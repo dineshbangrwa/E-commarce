@@ -106,7 +106,7 @@
                         <span id="qty-display" class="px-4 py-2.5 text-white font-medium min-w-[40px] text-center">1</span>
                         <button onclick="incrementQty()" class="px-4 py-2.5 text-[#9CA3AF] hover:text-white transition-colors"><i class="fas fa-plus"></i></button>
                     </div>
-                    <form action="{{ route('cart.add') }}" method="POST" class="flex-1">
+                    <form action="{{ route('cart.store', ['lang' => $langCode]) }}" method="POST" class="flex-1">
                         @csrf
                         <input type="hidden" name="product_id" value="{{ $product->id }}">
                         <input type="hidden" name="qty" id="qty-input" value="1">

@@ -39,7 +39,7 @@
                                 <img src="{{ $product->getFirstMediaUrl('image') }}" alt="{{ $product->name }}"
                                     class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
                             </a>
-                            <form action="{{ route('wishlist.remove', $wish->id) }}" method="POST" class="absolute top-3 right-3 z-10">
+                            <form action="{{ route('wishlist.remove', ['lang' => $langCode, 'id'=> $wish->id]) }}" method="POST" class="absolute top-3 right-3 z-10">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="w-8 h-8 flex items-center justify-center rounded-full glass text-[#EF4444] hover:bg-[#EF4444]/20 transition-all">

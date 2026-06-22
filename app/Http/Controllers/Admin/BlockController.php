@@ -20,7 +20,8 @@ class BlockController extends Controller
             return DataTables::of($data)
                 ->addIndexColumn()
                 ->addcolumn('image', function ($row) {
-                    $image = '<img id="preview" src="' . $row->getFirstMediaUrl('image') . '" alt="Current Image" style="max-width: 110px; margin-top: 10px;">';
+                    $image = '<img id="preview" src="'.$row->getFirstMediaUrl('image').'" alt="Current Image" style="max-width: 110px; margin-top: 10px;">';
+
                     return $image;
                 })
                 ->addColumn('action', function ($row) {
@@ -29,19 +30,21 @@ class BlockController extends Controller
                     $deleteUrl = route('block.destroy', $row->id);
 
                     $btn = '<div class="d-flex gap-2 text-nowrap">
-                <a href="' . $editUrl . '" class="btn btn-sm btn-primary">Edit</a>
-                <a href="' . $switch . '" class="btn btn-sm btn-primary">Switch lan.</a>
-                <form action="' . $deleteUrl . '" method="POST" style="display:inline;">
-                    ' . csrf_field() . method_field('DELETE') . '
+                <a href="'.$editUrl.'" class="btn btn-sm btn-primary">Edit</a>
+                <a href="'.$switch.'" class="btn btn-sm btn-primary">Switch lan.</a>
+                <form action="'.$deleteUrl.'" method="POST" style="display:inline;">
+                    '.csrf_field().method_field('DELETE').'
                     <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm(\'Are you sure?\')">Delete</button>
                 </form>
             </div>';
+
                     return $btn;
                 })
 
                 ->rawColumns(['action', 'image'])
                 ->make(true);
         }
+
         return view('Admin.Block.index');
     }
 
@@ -67,11 +70,11 @@ class BlockController extends Controller
         ];
         $block = Block::create($insert);
 
-
         if ($request->hasFile('image') && $request->file('image')->isValid()) {
             $block->addMediaFromRequest('image')->toMediaCollection('image');
         }
-        return redirect()->route('block.index')->with('success', 'Block is Created Succesfully');;
+
+        return redirect()->route('block.index')->with('success', 'Block is Created Succesfully');
     }
 
     /**
@@ -88,6 +91,7 @@ class BlockController extends Controller
     public function edit(string $id)
     {
         $block = Block::where('id', $id)->first();
+
         return view('Admin.Block.edit', compact('block'));
     }
 
@@ -124,6 +128,7 @@ class BlockController extends Controller
     {
         $block = Block::findOrFail($id);
         $block->delete();
-        return redirect()->route('block.index')->with('success', 'Block will be Delete Succesfully');;
+
+        return redirect()->route('block.index')->with('success', 'Block will be Delete Succesfully');
     }
 }

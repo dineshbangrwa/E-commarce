@@ -12,9 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('slid_languages', function (Blueprint $table) {
-           $table->id();
-            $table->unsignedBigInteger('slider_id'); 
-            $table->foreign('slider_id')->references('id')->on('sliders')->onDelete('cascade'); 
+            $table->id();
+            $table->unsignedBigInteger('slider_id');
+            $table->foreign('slider_id')->references('id')->on('sliders')->onDelete('cascade');
             $table->json('translated_data');
             $table->timestamps();
         });

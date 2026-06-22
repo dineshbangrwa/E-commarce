@@ -6,14 +6,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class ProLanguage extends Model
 {
-    protected $fillable =[
-      'product_id',
-      'translated_data',  
+    protected $fillable = [
+        'product_id',
+        'translated_data',
     ];
 
     protected $casts = [
-    'translated_data' => 'array',
-];
+        'translated_data' => 'array',
+    ];
 
     public function block()
     {

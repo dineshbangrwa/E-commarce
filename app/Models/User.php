@@ -3,19 +3,20 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
-use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\Permission\Traits\HasRoles;
-
+use Laravel\Cashier\Billable;
 
 class User extends Authenticatable implements HasMedia
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, InteractsWithMedia, HasApiTokens,HasRoles;
+    /** @use HasFactory<UserFactory> */
+    use HasApiTokens, HasFactory, HasRoles, InteractsWithMedia,Notifiable, Billable;
 
     /**
      * The attributes that are mass assignable.
@@ -54,7 +55,8 @@ class User extends Authenticatable implements HasMedia
             'password' => 'hashed',
         ];
     }
-      protected static function booted()
+
+    protected static function booted()
     {
         static::deleting(function ($user) {
             $user->clearMediaCollection('image');

@@ -20,13 +20,13 @@ class DatabaseSeeder extends Seeder
         //     'email' => 'dinesh@gmail.com',
         //     'password'=>1234567890,
         //     'phone'=>7014658316,
-            
+
         // ]);
         $this->call([
-       
-        CurrencySeeder::class,
-      
-    ]);
-    
+
+            CurrencySeeder::class,
+
+        ]);
+
     }
 }

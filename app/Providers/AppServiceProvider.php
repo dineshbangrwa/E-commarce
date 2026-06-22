@@ -2,15 +2,15 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Facades\View;
+use App\Models\Currency;
 use App\Models\Quote;
-use Illuminate\Support\Facades\Session;
-use App\Models\Wishlist;
 use App\Models\User;
+use App\Models\Wishlist;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\View;
+use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -27,14 +27,13 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
- $locale = session('language_code', config('app.locale'));
-    app()->setLocale($locale);
-    
+        $locale = session('language_code', config('app.locale'));
+        app()->setLocale($locale);
 
         Model::automaticallyEagerLoadRelationships();
         Paginator::useBootstrapFive();
-        if (!session()->has('currency_code')) {
-            $default = \App\Models\Currency::where('is_default', 1)->first();
+        if (! session()->has('currency_code')) {
+            $default = Currency::where('is_default', 1)->first();
 
             if ($default) {
                 session([
@@ -66,14 +65,14 @@ class AppServiceProvider extends ServiceProvider
                 'cartCount' => $cartCount,
                 'wishlistCount' => $wishlistCount,
             ]);
-            
+
         });
-         View::composer('*', function ($view) {
-        $users = User::where('is_admin', 0)
-                     ->latest()
-                     ->take(5)
-                     ->get();
-        $view->with('users', $users);
-    });
+        View::composer('*', function ($view) {
+            $users = User::where('is_admin', 0)
+                ->latest()
+                ->take(5)
+                ->get();
+            $view->with('users', $users);
+        });
     }
 }

@@ -2,11 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Models\User;
 use Illuminate\Support\Facades\Hash;
-
 
 class LoginController extends Controller
 {
@@ -15,12 +14,12 @@ class LoginController extends Controller
 
         return view('login');
     }
+
     public function store(Request $request)
     {
         // dd($request->all());
 
         // $data =$request->only('email','password');
-
 
         $data = $request->only('email', 'password');
         $data['is_admin'] = 1;
@@ -31,12 +30,14 @@ class LoginController extends Controller
             return redirect()->route('admin.login')->with('message', 'Login is faild');
         }
     }
+
     public function logout()
     {
-      $data =  Auth::logout();
-  
+        $data = Auth::logout();
+
         return redirect()->route('admin.login')->with('message', 'logout is succesfully');
     }
+
     public function adminregister(Request $request)
     {
         // dd($request->all());
@@ -50,7 +51,7 @@ class LoginController extends Controller
             'gender' => 1,
             'is_admin' => 0,
         ];
-        $user = user::create($insert);
+        $user = User::create($insert);
 
         if ($request->hasFile('image') && $request->file('image')->isValid()) {
             $user->addMediaFromRequest('image')->toMediaCollection('image');

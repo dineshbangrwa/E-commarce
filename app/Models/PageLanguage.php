@@ -20,6 +20,7 @@ class PageLanguage extends Model
     {
         return $this->belongsTo(Page::class, 'page_id');
     }
+
     public function language()
     {
         return $this->belongsTo(Language::class, 'language_id');

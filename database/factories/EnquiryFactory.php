@@ -2,11 +2,11 @@
 
 namespace Database\Factories;
 
-use Illuminate\Database\Eloquent\Factories\Factory;
 use App\Models\Enquiry;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Enquiry>
+ * @extends Factory<Enquiry>
  */
 class EnquiryFactory extends Factory
 {
@@ -18,10 +18,10 @@ class EnquiryFactory extends Factory
     public function definition(): array
     {
         return [
-        //     'name'=>$this->faker->word(),
-        //      'email'=>$this->faker->word(),
-        // 'phone'=>$this->faker->word(),
-        // 'message'=>$this->faker->word(),
+            //     'name'=>$this->faker->word(),
+            //      'email'=>$this->faker->word(),
+            // 'phone'=>$this->faker->word(),
+            // 'message'=>$this->faker->word(),
         ];
     }
 }

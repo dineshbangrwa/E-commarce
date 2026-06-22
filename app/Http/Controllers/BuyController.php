@@ -2,19 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\Quote;
-use App\Models\Quote_item;
-use Illuminate\Support\Facades\Auth;
-use App\Models\Order_address;
-use App\Models\Order;
-use App\Models\Order_item;
-use Illuminate\Support\Facades\Log;
-use App\Models\Attributevalue;
-use App\Models\Product;
-use App\Models\AttributeCombination;
-use Illuminate\Support\Facades\Mail;
 use App\Mail\MyEmail;
+use App\Models\Order;
+use App\Models\Order_address;
+use App\Models\Order_item;
+use App\Models\Product;
+use App\Models\Quote;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 
 class BuyController extends Controller
 {
@@ -31,10 +27,11 @@ class BuyController extends Controller
 
         return view('checkout', compact('quote'));
     }
+
     public function buystore(Request $request)
     {
 
-         $request->validate([
+        $request->validate([
             'name' => 'required|string|max:255',
             'phone' => 'required|string|max:20',
             'email' => 'required|email|max:255',
@@ -48,7 +45,7 @@ class BuyController extends Controller
             'sameBillingShipping' => 'nullable|boolean',
             'save_info' => 'nullable|boolean',
         ]);
-        
+
         $product = Product::findOrFail($request->product_id);
 
         $discount = 0;
@@ -56,7 +53,7 @@ class BuyController extends Controller
             $discount = 0.10 * $product->price;
             session([
                 'coupon_name' => $request->coupon_code,
-                'coupon_discount' => $discount
+                'coupon_discount' => $discount,
             ]);
         }
 
@@ -118,6 +115,6 @@ class BuyController extends Controller
         Mail::to('dineshkumarbangrwa55@gmail.com')->send(new MyEmail(Auth::user(), $order, $orderItems));
         $langCode = session('language_code', app()->getLocale());
 
-        return redirect()->route('lang.index',['lang' => $langCode])->with('message', 'Order placed successfully!');
+        return redirect()->route('lang.index', ['lang' => $langCode])->with('message', 'Order placed successfully!');
     }
 }

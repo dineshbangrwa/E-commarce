@@ -2,22 +2,21 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Block;
-use App\Models\Enquiry;
-use App\Models\Page;
-use App\Models\Product;
-use App\Models\Slider;
-use App\Models\Category;
+use App\Models\AttributeCombination;
 use App\Models\AttributeValue;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use App\Models\Quote;
+use App\Models\Block;
+use App\Models\Category;
+use App\Models\CatLanguage;
+use App\Models\Enquiry;
 use App\Models\Order;
-use App\Models\language;
+use App\Models\Page;
 use App\Models\PageLanguage;
+use App\Models\Product;
+use App\Models\ProLanguage;
+use App\Models\Slider;
 use App\Models\SlidLanguage;
 use App\Models\Translation;
-
+use Illuminate\Http\Request;
 
 class HomeController extends Controller
 {
@@ -35,6 +34,7 @@ class HomeController extends Controller
                 $block->name = $data['name'] ?? $block->name;
                 $block->description = $data['description'] ?? $block->description;
             }
+
             return $block;
         });
 
@@ -45,6 +45,7 @@ class HomeController extends Controller
                 $slider->title = $data['title'] ?? $slider->title;
                 $slider->description = $data['description'] ?? $slider->description;
             }
+
             return $slider;
         });
 
@@ -77,11 +78,11 @@ class HomeController extends Controller
 
         $product = Product::where('url_key', $url_key)->with('reviews')->first();
 
-        if (!$product) {
+        if (! $product) {
             abort(404);
         }
 
-        $translation = \App\Models\ProLanguage::where('product_id', $product->id)->first();
+        $translation = ProLanguage::where('product_id', $product->id)->first();
 
         if ($translation && isset($translation->translated_data[$langCode])) {
             $data = $translation->translated_data[$langCode];
@@ -92,10 +93,10 @@ class HomeController extends Controller
 
         $approvedReviews = $product->reviews()->where('approved', true)->latest()->get();
 
-        $relatedProductIds = explode(",", $product->related_product ?? '');
+        $relatedProductIds = explode(',', $product->related_product ?? '');
         $relatedProducts = Product::whereIn('id', $relatedProductIds)->get();
 
-        $attributeCombinations = \App\Models\AttributeCombination::where('product_id', $product->id)->get();
+        $attributeCombinations = AttributeCombination::where('product_id', $product->id)->get();
 
         return view('shop-detail', compact(
             'product',
@@ -112,7 +113,7 @@ class HomeController extends Controller
 
         $category = Category::where('url_key', $url_key)->firstOrFail();
 
-        $translation = \App\Models\CatLanguage::where('category_id', $category->id)->first();
+        $translation = CatLanguage::where('category_id', $category->id)->first();
 
         if ($translation && isset($translation->translated_data[$langCode]['name'])) {
             $category->name = $translation->translated_data[$langCode]['name'];
@@ -121,7 +122,7 @@ class HomeController extends Controller
 
         if ($request->filled('price_range')) {
             [$min, $max] = explode('-', $request->price_range);
-            $query->whereBetween('price', [(float)$min, (float)$max]);
+            $query->whereBetween('price', [(float) $min, (float) $max]);
         }
 
         if ($request->filled('size')) {
@@ -142,7 +143,7 @@ class HomeController extends Controller
 
         $products = $query->paginate(12)->appends($request->query());
         $products->getCollection()->transform(function ($product) use ($langCode) {
-            $translation = \App\Models\ProLanguage::where('product_id', $product->id)->first();
+            $translation = ProLanguage::where('product_id', $product->id)->first();
 
             if ($translation && isset($translation->translated_data[$langCode]['name'])) {
                 $product->translated_name = $translation->translated_data[$langCode]['name'];
@@ -172,14 +173,13 @@ class HomeController extends Controller
         return view('shop', compact('products', 'category', 'sizes', 'colors'));
     }
 
-
-
     // =================Contact Detail======================
 
     public function contact(Request $request)
     {
         return view('contact');
     }
+
     public function store(Request $request)
     {
 
@@ -205,6 +205,7 @@ class HomeController extends Controller
     public function order()
     {
         $orders = Order::where('user_id', auth()->id())->latest()->paginate(10);
+
         return view('order', compact('orders'));
     }
 
@@ -219,6 +220,7 @@ class HomeController extends Controller
         }
 
         $order->load('order_items.product'); // assuming relation exists
+
         return view('ordershow', compact('order'));
     }
 }

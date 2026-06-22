@@ -3,20 +3,21 @@
 namespace App\Http\Controllers\Language;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Models\Block;
 use App\Models\language;
 use App\Models\translation;
-use App\Models\Block;
+use Illuminate\Http\Request;
 
 class BlockTranslationController extends Controller
 {
     public function index($id)
     {
         $block = Block::findOrFail($id);
-        $languages = Language::all();
+        $languages = language::all();
 
         return view('Language.block', compact('block', 'languages'));
     }
+
     public function storeTranslation(Request $request, $blockId)
     {
         // dd($request->all());
@@ -28,7 +29,7 @@ class BlockTranslationController extends Controller
             'description' => 'required|string',
         ]);
 
-        $translation = Translation::firstOrNew(['block_id' => $blockId]);
+        $translation = translation::firstOrNew(['block_id' => $blockId]);
 
         $translatedData = $translation->translated_data ?? [];
         $translatedData[$request->language] = [
@@ -49,10 +50,11 @@ class BlockTranslationController extends Controller
     {
         $langCode = request('lang');
         $block = Block::findOrFail($blockId);
-        $translation = Translation::where('block_id', $blockId)->first();
+        $translation = translation::where('block_id', $blockId)->first();
 
         if ($translation && isset($translation->translated_data[$langCode])) {
             $data = $translation->translated_data[$langCode];
+
             return response()->json([
                 'name' => $data['name'] ?? $block->name,
                 'status' => $data['status'] ?? $block->status,
@@ -76,6 +78,7 @@ class BlockTranslationController extends Controller
         ]);
         $lang = $request->lang;
         session(['language_code' => $lang]);
+
         return redirect()->route('lang.index', ['lang' => $lang]);
     }
 }

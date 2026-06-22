@@ -3,12 +3,13 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
 class Page extends Model implements HasMedia
 {
     use InteractsWithMedia;
+
     protected $fillable = [
         'name',
         'status',
@@ -19,8 +20,9 @@ class Page extends Model implements HasMedia
         'meta_tag',
         'meta_title',
         'image',
-        'meta_description'
+        'meta_description',
     ];
+
     protected static function booted()
     {
         static::deleting(function ($page) {

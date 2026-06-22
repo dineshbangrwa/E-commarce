@@ -2,48 +2,48 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\Product;
+use App\Mail\MyEmail;
+use App\Models\AttributeCombination;
+use App\Models\Coupon;
 use App\Models\Order;
 use App\Models\Order_item;
-use App\Models\Coupon;
-use App\Mail\MyEmail;
-use Stripe\Stripe;
-use Stripe\Checkout\Session as StripeSession;
+use App\Models\Product;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
+use Stripe\Checkout\Session as StripeSession;
+use Stripe\Stripe;
 
 class BuyNowController extends Controller
 {
     public function checkout(Request $request, $lang, $id)
-{
-    app()->setLocale($lang);
-    session(['language_code' => $lang]); 
+    {
+        app()->setLocale($lang);
+        session(['language_code' => $lang]);
 
-    $product = Product::findOrFail($id);
-    $qty = $request->input('qty', 1);
-    $combinationId = $request->input('combination_id');
+        $product = Product::findOrFail($id);
+        $qty = $request->input('qty', 1);
+        $combinationId = $request->input('combination_id');
 
-    $coupon = session('coupon', null);
-    $discount = session('coupon_discount', 0);
+        $coupon = session('coupon', null);
+        $discount = session('coupon_discount', 0);
 
-    $combination = null;
-    if ($combinationId) {
-        $combination = \App\Models\AttributeCombination::find($combinationId);
+        $combination = null;
+        if ($combinationId) {
+            $combination = AttributeCombination::find($combinationId);
+        }
+
+        $price = $combination ? $combination->price : $product->price;
+        $subtotal = $price * $qty;
+        $total = $subtotal - $discount;
+
+        return view('buycheckout', compact('product', 'qty', 'coupon', 'discount', 'subtotal', 'total', 'combination'));
     }
 
-    $price = $combination ? $combination->price : $product->price;
-    $subtotal = $price * $qty;
-    $total = $subtotal - $discount;
-
-    return view('buycheckout', compact('product', 'qty', 'coupon', 'discount', 'subtotal', 'total', 'combination'));
-}
-
-
-    public function applyCoupon(Request $request,$lang)
+    public function applyCoupon(Request $request, $lang)
     {
         $lang = session('language_code', config('app.locale', 'en'));
-        
+
         $request->validate([
             'coupon' => 'required|string',
             'product_id' => 'required|exists:products,id',
@@ -56,12 +56,12 @@ class BuyNowController extends Controller
 
         $coupon = Coupon::where('coupon_code', $couponCode)->first();
 
-        if (!$coupon || $coupon->status != 1) {
+        if (! $coupon || $coupon->status != 1) {
             return redirect()->back()->with('error', 'Invalid or inactive coupon.');
         }
 
         $now = now();
-        if (!$now->between($coupon->valid_from, $coupon->valid_to)) {
+        if (! $now->between($coupon->valid_from, $coupon->valid_to)) {
             return redirect()->back()->with('error', 'Coupon is not valid right now.');
         }
 
@@ -75,13 +75,13 @@ class BuyNowController extends Controller
             'coupon_discount' => $coupon->coupon_discount,
         ]);
 
-return redirect()->route('buy', ['lang' => $lang, 'id' => $product->id, 'qty' => $qty])
+        return redirect()->route('buy', ['lang' => $lang, 'id' => $product->id, 'qty' => $qty])
             ->with('message', 'Coupon applied successfully!');
     }
 
     public function stripePost(Request $request)
     {
-         $request->validate([
+        $request->validate([
             'name' => 'required|string|max:255',
             'phone' => 'required|string|max:20',
             'email' => 'required|email|max:255',
@@ -95,7 +95,7 @@ return redirect()->route('buy', ['lang' => $lang, 'id' => $product->id, 'qty' =>
             'sameBillingShipping' => 'nullable|boolean',
             'save_info' => 'nullable|boolean',
         ]);
-        
+
         Stripe::setApiKey(env('STRIPE_SECRET'));
 
         $product = Product::findOrFail($request->product_id);
@@ -104,7 +104,7 @@ return redirect()->route('buy', ['lang' => $lang, 'id' => $product->id, 'qty' =>
 
         $combination = null;
         if ($combinationId) {
-            $combination = \App\Models\AttributeCombination::find($combinationId);
+            $combination = AttributeCombination::find($combinationId);
         }
 
         $price = $combination ? $combination->price : $product->price;
@@ -127,7 +127,7 @@ return redirect()->route('buy', ['lang' => $lang, 'id' => $product->id, 'qty' =>
                 'quantity' => $qty,
             ]],
             'mode' => 'payment',
-            'success_url' => route('buy.success') . '?session_id={CHECKOUT_SESSION_ID}',
+            'success_url' => route('buy.success').'?session_id={CHECKOUT_SESSION_ID}',
             'cancel_url' => route('buy.cancel'),
             'metadata' => [
                 'product_id' => $product->id,
@@ -151,7 +151,6 @@ return redirect()->route('buy', ['lang' => $lang, 'id' => $product->id, 'qty' =>
         return redirect($session->url);
     }
 
-
     public function buysuccess(Request $request)
     {
         Stripe::setApiKey(env('STRIPE_SECRET'));
@@ -164,7 +163,7 @@ return redirect()->route('buy', ['lang' => $lang, 'id' => $product->id, 'qty' =>
         $combinationId = $meta->combination_id ?? null;
         $combination = null;
         if ($combinationId) {
-            $combination = \App\Models\AttributeCombination::find($combinationId);
+            $combination = AttributeCombination::find($combinationId);
         }
 
         $price = $combination ? $combination->price : $product->price;
@@ -200,25 +199,23 @@ return redirect()->route('buy', ['lang' => $lang, 'id' => $product->id, 'qty' =>
             'row_total' => $total,
             'custom_option' => $combinationId ?? '',
         ]);
-        
+
         $orderItems = Order_item::where('order_id', $order->id)->get();
 
         // Mail::to($meta->email)->send(new MyEmail(Auth::user(), $order, [$product]));
         Mail::to('dineshkumarbangrwa55@gmail.com')->send(new MyEmail(Auth::user(), $order, $orderItems));
 
-
         session()->forget('coupon');
         session()->forget('coupon_discount');
         $langCode = session('language_code', app()->getLocale());
 
-        return redirect()->route('lang.index',['lang' => $langCode])->with('message', 'Order placed successfully!');
+        return redirect()->route('lang.index', ['lang' => $langCode])->with('message', 'Order placed successfully!');
     }
-
 
     public function buycancel()
     {
         $langCode = session('language_code', app()->getLocale());
 
-        return redirect()->route('lang.index',['lang' => $langCode])->with('error', 'Payment was cancelled.');
+        return redirect()->route('lang.index', ['lang' => $langCode])->with('error', 'Payment was cancelled.');
     }
 }

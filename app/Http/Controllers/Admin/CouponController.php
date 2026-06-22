@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Coupon;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
-use App\Models\Coupon;
 
 class CouponController extends Controller
 {
@@ -17,7 +17,8 @@ class CouponController extends Controller
         if ($request->ajax()) {
 
             $data = Coupon::select('*');
-            return Datatables::of($data)
+
+            return DataTables::of($data)
 
                 ->addIndexColumn()
 
@@ -26,22 +27,24 @@ class CouponController extends Controller
                     $deleteUrl = route('coupon.destroy', $row->id);
 
                     $btn = '<div class="d-flex gap-2 text-nowrap">
-                <a href="' . $editUrl . '" class="btn btn-sm btn-primary">Edit</a>
-                <form action="' . $deleteUrl . '" method="POST" style="display:inline;">
-                    ' . csrf_field() . method_field('DELETE') . '
+                <a href="'.$editUrl.'" class="btn btn-sm btn-primary">Edit</a>
+                <form action="'.$deleteUrl.'" method="POST" style="display:inline;">
+                    '.csrf_field().method_field('DELETE').'
                     <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm(\'Are you sure?\')">Delete</button>
                 </form>
             </div>';
+
                     return $btn;
                 })
-
 
                 ->rawColumns(['action'])
 
                 ->make(true);
         }
+
         return view('admin.coupon.index');
     }
+
     /**
      * Show the form for creating a new resource.
      */
@@ -65,8 +68,10 @@ class CouponController extends Controller
             'coupon_discount' => $request->coupon_discount,
         ];
         Coupon::create($insert);
-        return redirect()->route('coupon.index')->with('success', 'Coupon Created Succesfully');;;
+
+        return redirect()->route('coupon.index')->with('success', 'Coupon Created Succesfully');
     }
+
     /**
      * Display the specified resource.
      */
@@ -74,14 +79,17 @@ class CouponController extends Controller
     {
         //
     }
+
     /**
      * Show the form for editing the specified resource.
      */
     public function edit(string $id)
     {
         $coupon = Coupon::where('id', $id)->first();
+
         return view('admin.coupon.edit', compact('coupon'));
     }
+
     /**
      * Update the specified resource in storage.
      */
@@ -96,6 +104,7 @@ class CouponController extends Controller
             'coupon_discount' => $request->coupon_discount,
         ];
         Coupon::where('id', $id)->update($insert);
+
         return redirect()->route('coupon.index')->with('success', 'Coupon will be Update Succesfully');
     }
 
@@ -105,6 +114,7 @@ class CouponController extends Controller
     public function destroy(string $id)
     {
         Coupon::where('id', $id)->delete();
-        return redirect()->route('coupon.index')->with('success', 'Coupon will be Delete Succesfully');;
+
+        return redirect()->route('coupon.index')->with('success', 'Coupon will be Delete Succesfully');
     }
 }

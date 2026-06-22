@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Middleware\CustomCheck;
+use App\Http\Middleware\LastSeen;
+use App\Http\Middleware\SetLocale;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -12,14 +15,11 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-         $middleware->appendToGroup('web', \App\Http\Middleware\LastSeen::class);
+        $middleware->appendToGroup('web', LastSeen::class);
 
-        $middleware->appendToGroup('CustomCheck', \App\Http\Middleware\CustomCheck::class);
-        $middleware->appendToGroup('setLocale', \App\Http\Middleware\SetLocale::class);
+        $middleware->appendToGroup('CustomCheck', CustomCheck::class);
+        $middleware->appendToGroup('setLocale', SetLocale::class);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
     })->create();
-    
-    
-    

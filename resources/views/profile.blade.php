@@ -32,9 +32,9 @@
                         <a href="{{ route('profile', ['lang' => $langCode]) }}" class="flex items-center gap-3 px-4 py-2.5 text-sm rounded-lg bg-[rgba(108,59,241,0.15)] text-white">
                             <i class="fas fa-user text-[#8B5CF6]"></i> Profile
                         </a>
-                        <a href="{{ route('order.index', ['lang' => $langCode]) }}" class="flex items-center gap-3 px-4 py-2.5 text-sm rounded-lg text-[#9CA3AF] hover:text-white hover:bg-[rgba(255,255,255,0.05)] transition-all">
+                        {{-- <a href="{{ route('order.index', ['lang' => $langCode]) }}" class="flex items-center gap-3 px-4 py-2.5 text-sm rounded-lg text-[#9CA3AF] hover:text-white hover:bg-[rgba(255,255,255,0.05)] transition-all">
                             <i class="fas fa-box"></i> Orders
-                        </a>
+                        </a> --}}
                         <a href="{{ route('wishlist.index', ['lang' => $langCode]) }}" class="flex items-center gap-3 px-4 py-2.5 text-sm rounded-lg text-[#9CA3AF] hover:text-white hover:bg-[rgba(255,255,255,0.05)] transition-all">
                             <i class="fas fa-heart"></i> Wishlist
                         </a>
@@ -48,17 +48,17 @@
             <div class="lg:col-span-3">
                 <div class="glass rounded-2xl p-6 lg:p-8 border border-[rgba(255,255,255,0.06)]">
                     <h3 class="text-white font-semibold text-lg mb-6">Profile Information</h3>
-                    <form action="{{ route('profile.update') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
+                    <form action="{{ route('profile.update', ['lang' => $langCode]) }}" method="POST" enctype="multipart/form-data" class="space-y-4">
                         @csrf
                         @method('PUT')
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-sm text-[#9CA3AF] mb-1.5">First Name</label>
-                                <input type="text" name="first_name" value="{{ Auth::user()->first_name ?? old('first_name') }}" class="input-field">
+                                <input type="text" name="first_name" value="{{ Auth::user()->name ?? old('first_name') }}" class="input-field">
                             </div>
                             <div>
                                 <label class="block text-sm text-[#9CA3AF] mb-1.5">Last Name</label>
-                                <input type="text" name="last_name" value="{{ Auth::user()->last_name ?? old('last_name') }}" class="input-field">
+                                <input type="text" name="last_name" value="{{ Auth::user()->name ?? old('last_name') }}" class="input-field">
                             </div>
                             <div>
                                 <label class="block text-sm text-[#9CA3AF] mb-1.5">Email</label>
@@ -91,6 +91,8 @@
                             <div class="md:col-span-2">
                                 <label class="block text-sm text-[#9CA3AF] mb-1.5">Profile Image</label>
                                 <input type="file" name="image" class="input-field file:text-[#9CA3AF] file:bg-[rgba(255,255,255,0.05)] file:border-0 file:rounded-lg file:px-3 file:py-1.5 file:text-sm file:text-[#F1F1F6]">
+        <img id="preview" src="{{ Auth::user()->getFirstMediaUrl('image') }}" alt="Current Image" style="max-width: 70px; margin-top: 7px;">
+
                             </div>
                         </div>
                         <div class="flex justify-end pt-4">

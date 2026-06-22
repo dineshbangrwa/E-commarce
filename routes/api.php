@@ -10,9 +10,8 @@ Route::get('/user', function (Request $request) {
 
 Route::get('hello', function () {
     return response()->json([
-        'message' => 'hello!'
+        'message' => 'hello!',
     ], 200);
 });
-
 
 Route::resource('sliders', SliderController::class);

@@ -1,15 +1,14 @@
 <?php
 
-use App\Models\Slider;
-use App\Models\Block;
-use App\Models\Page;
-use App\Models\Product;
 use App\Models\Category;
+use App\Models\CatLanguage;
+use App\Models\Page;
+use App\Models\PageLanguage;
+use App\Models\Product;
 use App\Models\ProLanguage;
-use Illuminate\Support\Facades\Auth;
 use App\Models\Quote;
-
-
+use App\Models\Slider;
+use Illuminate\Support\Facades\Auth;
 
 // if (!function_exists('')) {
 //     function product()
@@ -20,7 +19,7 @@ use App\Models\Quote;
 //     }
 // }
 
-if (!function_exists('product')) {
+if (! function_exists('product')) {
     function product()
     {
         $langCode = session('language_code', config('app.locale'));
@@ -42,7 +41,7 @@ if (!function_exists('product')) {
     }
 }
 
-if (!function_exists('')) {
+if (! function_exists('')) {
     function quote()
     {
         $quote = null;
@@ -64,31 +63,32 @@ if (!function_exists('')) {
     }
 }
 
-if (!function_exists('')) {
+if (! function_exists('')) {
     function slider()
     {
         $slider = Slider::all();
+
         return $slider;
     }
 }
-if (!function_exists('category')) {
+if (! function_exists('category')) {
     function category()
     {
         $langCode = session('language_code', config('app.locale'));
 
-        $categories = \App\Models\Category::where('status', 0)
+        $categories = Category::where('status', 0)
             ->with('subcategories')
             ->get();
 
         foreach ($categories as $category) {
-            $translation = \App\Models\CatLanguage::where('category_id', $category->id)->first();
+            $translation = CatLanguage::where('category_id', $category->id)->first();
             if ($translation && isset($translation->translated_data[$langCode]['name'])) {
                 $category->name = $translation->translated_data[$langCode]['name'];
             }
 
             // Subcategories के लिए भी translation
             foreach ($category->subcategories as $sub) {
-                $subTranslation = \App\Models\CatLanguage::where('category_id', $sub->id)->first();
+                $subTranslation = CatLanguage::where('category_id', $sub->id)->first();
                 if ($subTranslation && isset($subTranslation->translated_data[$langCode]['name'])) {
                     $sub->name = $subTranslation->translated_data[$langCode]['name'];
                 }
@@ -99,18 +99,18 @@ if (!function_exists('category')) {
     }
 }
 
-if (!function_exists('page')) {
+if (! function_exists('page')) {
     function page()
     {
         $langCode = session('language_code', config('app.locale'));
 
-        $pages = \App\Models\Page::where('status', 1)->get();
+        $pages = Page::where('status', 1)->get();
 
         foreach ($pages as $page) {
-            $translation = \App\Models\PageLanguage::where('page_id', $page->id)->first();
+            $translation = PageLanguage::where('page_id', $page->id)->first();
 
             if ($translation && isset($translation->translated_data[$langCode]['name'])) {
-             
+
                 $page->name = $translation->translated_data[$langCode]['name'];
             }
         }
@@ -119,16 +119,15 @@ if (!function_exists('page')) {
     }
 }
 
-
-if (!function_exists('category1')) {
+if (! function_exists('category1')) {
     function category1()
     {
         $langCode = session('language_code', config('app.locale'));
 
-        $categories = \App\Models\Category::where('parent_category', 0)->get();
+        $categories = Category::where('parent_category', 0)->get();
 
         foreach ($categories as $category) {
-            $translation = \App\Models\CatLanguage::where('category_id', $category->id)->first();
+            $translation = CatLanguage::where('category_id', $category->id)->first();
 
             if ($translation && isset($translation->translated_data[$langCode]['name'])) {
                 $category->name = $translation->translated_data[$langCode]['name'];
@@ -142,15 +141,15 @@ if (!function_exists('category1')) {
     }
 }
 
-if (!function_exists('subcategory')) {
+if (! function_exists('subcategory')) {
     function subcategory($id)
     {
         $langCode = session('language_code', config('app.locale'));
 
-        $categories = \App\Models\Category::where('parent_category', $id)->get();
+        $categories = Category::where('parent_category', $id)->get();
 
         foreach ($categories as $category) {
-            $translation = \App\Models\CatLanguage::where('category_id', $category->id)->first();
+            $translation = CatLanguage::where('category_id', $category->id)->first();
 
             if ($translation && isset($translation->translated_data[$langCode]['name'])) {
                 $category->name = $translation->translated_data[$langCode]['name'];
@@ -163,7 +162,6 @@ if (!function_exists('subcategory')) {
         return $categories;
     }
 }
-
 
 //  function product1() {
 //     return Product::where('status', 1)->get();
@@ -189,9 +187,7 @@ function product1()
     return $products;
 }
 
-
-
-if (!function_exists('getProductPrice')) {
+if (! function_exists('getProductPrice')) {
     function getProductPrice(Product $product)
     {
         return $product->special_price ?? $product->price;

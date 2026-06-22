@@ -3,13 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
 class Category extends Model implements HasMedia
 {
     use InteractsWithMedia;
-
 
     protected $fillable = [
         'parent_category',
@@ -28,6 +27,7 @@ class Category extends Model implements HasMedia
     {
         return $this->belongsToMany(Category::class, 'product_categories', 'product_id', 'category_id');
     }
+
     public function products()
     {
         return $this->belongsToMany(Product::class, 'product_categories', 'category_id', 'product_id');
@@ -37,5 +37,4 @@ class Category extends Model implements HasMedia
     {
         return $this->hasMany(Category::class, 'parent_category');
     }
-    
 }

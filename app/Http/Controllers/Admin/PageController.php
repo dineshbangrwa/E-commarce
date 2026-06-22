@@ -3,11 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\Page;
-use Yajra\DataTables\DataTables;
+use Illuminate\Http\Request;
 use Illuminate\Support\Str;
-
+use Yajra\DataTables\DataTables;
 
 class PageController extends Controller
 {
@@ -22,7 +21,8 @@ class PageController extends Controller
             return DataTables::of($data)
                 ->addIndexColumn()
                 ->addcolumn('image', function ($row) {
-                    $image = '<img id="preview" src="' . $row->getFirstMediaUrl('image') . '" alt="Current Image" style="max-width: 110px; margin-top: 10px;">';
+                    $image = '<img id="preview" src="'.$row->getFirstMediaUrl('image').'" alt="Current Image" style="max-width: 110px; margin-top: 10px;">';
+
                     return $image;
                 })
 
@@ -32,19 +32,21 @@ class PageController extends Controller
                     $deleteUrl = route('page.destroy', $row->id);
 
                     $btn = '<div class="d-flex gap-2 text-nowrap">
-                <a href="' . $editUrl . '" class="btn btn-sm btn-primary">Edit</a>
-                <a href="' . $switch . '" class="btn btn-sm btn-primary">Switch lan.</a>
-                <form action="' . $deleteUrl . '" method="POST" style="display:inline;">
-                    ' . csrf_field() . method_field('DELETE') . '
+                <a href="'.$editUrl.'" class="btn btn-sm btn-primary">Edit</a>
+                <a href="'.$switch.'" class="btn btn-sm btn-primary">Switch lan.</a>
+                <form action="'.$deleteUrl.'" method="POST" style="display:inline;">
+                    '.csrf_field().method_field('DELETE').'
                     <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm(\'Are you sure you want to delete this page?\')">Delete</button>
                 </form>
             </div>';
+
                     return $btn;
                 })
 
                 ->rawColumns(['action', 'image'])
                 ->make(true);
         }
+
         return view('admin.Page.index');
     }
 
@@ -76,6 +78,7 @@ class PageController extends Controller
         if ($request->hasfile('image') && $request->file('image')) {
             $page->addMediaFromRequest('image')->toMediaCollection('image');
         }
+
         return redirect()->route('page.index')->with('success', 'Page will be Created Succesfully');
     }
 
@@ -93,6 +96,7 @@ class PageController extends Controller
     public function edit(string $id)
     {
         $page = Page::where('id', $id)->first();
+
         return view('admin.Page.edit', compact('page'));
     }
 
@@ -122,6 +126,7 @@ class PageController extends Controller
             }
             $page->addMediaFromRequest('image')->toMediaCollection('image');
         }
+
         return redirect()->route('page.index')->with('success', 'Page will be Update Succesfully');
     }
 
@@ -132,6 +137,7 @@ class PageController extends Controller
     {
         $page = Page::findOrFail($id);
         $page->delete();
-        return redirect()->route('page.index')->with('success', 'Page will be Delete Succesfully');;
+
+        return redirect()->route('page.index')->with('success', 'Page will be Delete Succesfully');
     }
 }

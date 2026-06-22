@@ -3,29 +3,29 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
-
-
-class Block extends Model  implements HasMedia
+class Block extends Model implements HasMedia
 {
     use InteractsWithMedia;
-    
-     protected $fillable = [
+
+    protected $fillable = [
         'name',
         'status',
         'identifire',
         'image',
         'description',
-        
+
     ];
-      protected static function booted()
+
+    protected static function booted()
     {
         static::deleting(function ($block) {
             $block->clearMediaCollection('image');
         });
     }
+
     public function translations()
     {
         return $this->hasMany(Translation::class, 'block_id');

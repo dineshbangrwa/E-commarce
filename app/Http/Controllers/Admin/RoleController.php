@@ -4,10 +4,10 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Spatie\Permission\Models\Role;
-use Spatie\Permission\Models\Permission;
-use Yajra\DataTables\DataTables;
 use Illuminate\Support\Facades\Gate;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
+use Yajra\DataTables\DataTables;
 
 class RoleController extends Controller
 {
@@ -23,11 +23,12 @@ class RoleController extends Controller
 
             $data = Role::select('*');
 
-            return Datatables::of($data)
+            return DataTables::of($data)
 
                 ->addIndexColumn()
                 ->addColumn('permissions', function ($row) {
                     $pemission = implode(',', $row->permissions->pluck('name')->toArray());
+
                     return $pemission;
                 })
                 ->addColumn('action', function ($row) {
@@ -35,20 +36,21 @@ class RoleController extends Controller
                     $deleteUrl = route('role.destroy', $row->id);
 
                     $btn = '<div class="d-flex gap-2 text-nowrap">
-                <a href="' . $editUrl . '" class="btn btn-sm btn-primary">Edit</a>
-                <form action="' . $deleteUrl . '" method="POST" style="display:inline;">
-                    ' . csrf_field() . method_field('DELETE') . '
+                <a href="'.$editUrl.'" class="btn btn-sm btn-primary">Edit</a>
+                <form action="'.$deleteUrl.'" method="POST" style="display:inline;">
+                    '.csrf_field().method_field('DELETE').'
                     <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm(\'Are you sure you want to delete this role?\')">Delete</button>
                 </form>
             </div>';
+
                     return $btn;
                 })
-
 
                 ->rawColumns(['action'])
 
                 ->make(true);
         }
+
         return view('Admin.Role.index');
     }
 
@@ -81,6 +83,7 @@ class RoleController extends Controller
         $role = Role::create($insert);
 
         $role->syncPermissions($request->permissions);
+
         return redirect()->route('role.index')->with('success', 'Role will be Created Succesfully');
     }
 
@@ -103,6 +106,7 @@ class RoleController extends Controller
         $permissions = Permission::all();
 
         $roles = Role::where('id', $id)->first();
+
         return view('Admin.Role.edit', compact('roles', 'permissions'));
     }
 
@@ -121,6 +125,7 @@ class RoleController extends Controller
         $role = Role::where('id', $id)->update($insert);
         $role = Role::find($id);
         $role->syncPermissions($request->permissions);
+
         return redirect()->route('role.index')->with('success', 'Role will be Update Succesfully');
     }
 
@@ -133,6 +138,7 @@ class RoleController extends Controller
             abort(403, 'unauthorized action');
         }
         Role::where('id', $id)->delete();
+
         return redirect()->route('role.index')->with('success', 'Role will be Delete Succesfully');
     }
 }

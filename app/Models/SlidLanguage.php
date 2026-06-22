@@ -11,14 +11,15 @@ class SlidLanguage extends Model
         'translated_data',
     ];
 
-     protected $casts = [
+    protected $casts = [
         'translated_data' => 'array',
     ];
-    
+
     public function slider()
     {
         return $this->belongsTo(Slider::class, 'slider_id');
     }
+
     public function language()
     {
         return $this->belongsTo(Language::class, 'language_id');

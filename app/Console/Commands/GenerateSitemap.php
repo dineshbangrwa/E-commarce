@@ -2,15 +2,16 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Page;
+use App\Models\Product;
 use Illuminate\Console\Command;
 use Spatie\Sitemap\Sitemap;
 use Spatie\Sitemap\Tags\Url;
-use App\Models\Product;
-use App\Models\Page;
 
 class GenerateSitemap extends Command
 {
     protected $signature = 'generate:sitemap';
+
     protected $description = 'Generate sitemap.xml for the site';
 
     public function handle()

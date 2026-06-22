@@ -17,6 +17,7 @@ class LanSliderController extends Controller
 
         return view('Language.slider', compact('slider', 'languages'));
     }
+
     public function storeTranslation(Request $request, $sliderId)
     {
         // dd($request->all());
@@ -42,7 +43,6 @@ class LanSliderController extends Controller
         return response()->json(['message' => 'Translation saved successfully']);
     }
 
-
     public function getTranslation($sliderId)
     {
         $langCode = request('lang');
@@ -51,6 +51,7 @@ class LanSliderController extends Controller
 
         if ($translation && isset($translation->translated_data[$langCode])) {
             $data = $translation->translated_data[$langCode];
+
             return response()->json([
                 'title' => $data['title'] ?? $product->title,
                 'description' => $data['description'] ?? $product->description,
@@ -71,6 +72,7 @@ class LanSliderController extends Controller
         ]);
         $lang = $request->lang;
         session(['language_code' => $lang]);
+
         return redirect()->route('lang.index', ['lang' => $lang]);
     }
 }

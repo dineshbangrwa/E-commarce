@@ -3,15 +3,14 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Product;
-use App\Models\Category;
 use App\Models\Attribute;
-use App\Models\AttributeValue;
 use App\Models\AttributeCombination;
+use App\Models\AttributeValue;
+use App\Models\Category;
+use App\Models\Product;
 use Illuminate\Http\Request;
-use Yajra\DataTables\DataTables;
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Log;
+use Yajra\DataTables\DataTables;
 
 class ProductController extends Controller
 {
@@ -24,15 +23,16 @@ class ProductController extends Controller
                 ->addIndexColumn()
                 ->addColumn('image', function ($row) {
                     return $row->getFirstMediaUrl('image')
-                        ? '<img src="' . $row->getFirstMediaUrl('image') . '" alt="Image" style="max-width: 70px;">'
+                        ? '<img src="'.$row->getFirstMediaUrl('image').'" alt="Image" style="max-width: 70px;">'
                         : 'No Image';
                 })
                 ->addColumn('banner_image', function ($row) {
                     $bannerImages = $row->getMedia('banner_image');
                     $banner_image = '';
                     foreach ($bannerImages as $image) {
-                        $banner_image .= '<img src="' . $image->getUrl() . '" alt="Banner Image" style="max-width: 70px; margin: 5px;">';
+                        $banner_image .= '<img src="'.$image->getUrl().'" alt="Banner Image" style="max-width: 70px; margin: 5px;">';
                     }
+
                     return $banner_image ?: 'No Banner Images';
                 })
                 ->addColumn('action', function ($row) {
@@ -40,20 +40,21 @@ class ProductController extends Controller
                     $deleteUrl = route('product.destroy', $row->id);
                     $switch = route('lang.switch.product', $row->id);
 
-
                     $btn = '<div class="d-flex gap-2">
-                <a href="' . $editUrl . '" class="btn btn-sm btn-primary">Edit</a>
-                <a href="' . $switch . '" class="btn btn-sm btn-primary">Switch lan.</a>
-                <form action="' . $deleteUrl . '" method="POST" style="display:inline;">
-                    ' . csrf_field() . method_field('DELETE') . '
+                <a href="'.$editUrl.'" class="btn btn-sm btn-primary">Edit</a>
+                <a href="'.$switch.'" class="btn btn-sm btn-primary">Switch lan.</a>
+                <form action="'.$deleteUrl.'" method="POST" style="display:inline;">
+                    '.csrf_field().method_field('DELETE').'
                     <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm(\'Are you sure?\')">Delete</button>
                 </form>
             </div>';
+
                     return $btn;
                 })
                 ->rawColumns(['action', 'image', 'banner_image'])
                 ->make(true);
         }
+
         return view('Admin.Product.index');
     }
 
@@ -64,6 +65,7 @@ class ProductController extends Controller
         $product = null;
         $existingAttributes = [];
         $existingCombinations = [];
+
         return view('Admin.Product.create', compact('products', 'categorys', 'product', 'existingAttributes', 'existingCombinations'));
     }
 
@@ -102,12 +104,13 @@ class ProductController extends Controller
                 function ($attribute, $value, $fail) {
                     $decoded = json_decode($value, true);
                     if (json_last_error() !== JSON_ERROR_NONE) {
-                        $fail('The ' . $attribute . ' must be valid JSON.');
+                        $fail('The '.$attribute.' must be valid JSON.');
+
                         return;
                     }
                     foreach ($decoded as $item) {
-                        if (!isset($item['attribute']) || !isset($item['value'])) {
-                            $fail('Each item in ' . $attribute . ' must contain "attribute" and "value" keys.');
+                        if (! isset($item['attribute']) || ! isset($item['value'])) {
+                            $fail('Each item in '.$attribute.' must contain "attribute" and "value" keys.');
                         }
                     }
                 },
@@ -163,7 +166,6 @@ class ProductController extends Controller
             AttributeValue::where('product_id', $product->id)->delete();
             Attribute::where('product_id', $product->id)->delete();
         }
-
 
         return redirect()->route('product.index')->with('success', 'Product created successfully!');
     }
@@ -332,7 +334,6 @@ class ProductController extends Controller
             $originalName = $attrData['original_name'] ?? null;
             $attribute = null;
 
-
             if ($originalName && isset($existingAttributes[$originalName])) {
                 $attribute = $existingAttributes[$originalName];
 
@@ -352,8 +353,7 @@ class ProductController extends Controller
                 $existingAttributes[$attributeName] = $attribute;
             }
 
-
-            $values = array_filter(array_map('trim', $attrData['values']), fn($v) => $v !== '');
+            $values = array_filter(array_map('trim', $attrData['values']), fn ($v) => $v !== '');
             $attributeValueIds = [];
 
             foreach ($values as $value) {
@@ -366,15 +366,12 @@ class ProductController extends Controller
                 $attributeMap[$attributeName][$value] = $attributeValue->id;
             }
 
-
             AttributeValue::where('attribute_id', $attribute->id)
                 ->whereNotIn('id', $attributeValueIds)
                 ->delete();
         }
 
-
         $this->processCombinations($product, $combinations, $attributeMap);
-
 
         $this->cleanupOrphanedAttributes($product);
     }
@@ -384,13 +381,14 @@ class ProductController extends Controller
 
         if (empty($combinations)) {
             AttributeCombination::where('product_id', $product->id)->delete();
+
             return;
         }
 
         // Get all combo IDs present in the request (except new)
         $requestedIds = [];
         foreach ($combinations as $comboData) {
-            if (!empty($comboData['id']) && isset($comboData['status']) && $comboData['status'] !== 'new') {
+            if (! empty($comboData['id']) && isset($comboData['status']) && $comboData['status'] !== 'new') {
                 $requestedIds[] = $comboData['id'];
             }
         }
@@ -402,7 +400,7 @@ class ProductController extends Controller
         $toDelete = array_diff($existingIds, $requestedIds);
 
         // Delete all not-present IDs
-        if (!empty($toDelete)) {
+        if (! empty($toDelete)) {
             AttributeCombination::whereIn('id', $toDelete)->delete();
         }
 
@@ -412,6 +410,7 @@ class ProductController extends Controller
 
             if ($status === 'deleted' && isset($comboData['id'])) {
                 AttributeCombination::where('id', $comboData['id'])->delete();
+
                 continue;
             }
 
@@ -449,21 +448,18 @@ class ProductController extends Controller
         }
     }
 
-
     private function cleanupOrphanedAttributes(Product $product)
     {
 
         $usedValueIds = AttributeCombination::where('product_id', $product->id)
             ->pluck('attribute_value_ids')
-            ->flatMap(fn($ids) => is_array($ids) ? $ids : [])
+            ->flatMap(fn ($ids) => is_array($ids) ? $ids : [])
             ->unique()
             ->filter();
-
 
         AttributeValue::where('product_id', $product->id)
             ->whereNotIn('id', $usedValueIds)
             ->delete();
-
 
         $usedAttributeIds = AttributeValue::where('product_id', $product->id)
             ->pluck('attribute_id')
@@ -481,6 +477,7 @@ class ProductController extends Controller
         $product->clearMediaCollection('banner_image');
         $product->combinations()->delete();
         $product->delete();
+
         return redirect()->route('product.index')->with('success', 'Product deleted successfully!');
     }
 }

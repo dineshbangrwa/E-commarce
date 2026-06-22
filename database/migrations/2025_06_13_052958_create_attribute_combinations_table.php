@@ -13,7 +13,7 @@ return new class extends Migration
         Schema::create('attribute_combinations', function (Blueprint $table) {
             $table->id();
             $table->foreignId('product_id')->constrained()->onDelete('cascade');
-          $table->json('attribute_value_ids')->nullable();
+            $table->json('attribute_value_ids')->nullable();
             $table->decimal('price', 8, 2);
             $table->integer('stock');
             $table->timestamps();

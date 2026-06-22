@@ -15,40 +15,36 @@ class LanguageController extends Controller
     //     $lang = $request->lang;
     //     session(['language_code' => $lang]);
 
-
     //     return redirect()->route('lang.index', ['lang' => $lang]);
     // }
     public function change(Request $request)
-{
-    $request->validate([
-        'lang' => 'required|string|exists:languages,code',
-    ]);
+    {
+        $request->validate([
+            'lang' => 'required|string|exists:languages,code',
+        ]);
 
-    $lang = $request->lang;
-    session(['language_code' => $lang]);
+        $lang = $request->lang;
+        session(['language_code' => $lang]);
 
-    // पुराने URL को मिलेगा ताकि redirect उसी पेज पर हो
-    $previousUrl = url()->previous(); 
-    
-    // URL से old locale remove करके new locale add करना होगा
+        // पुराने URL को मिलेगा ताकि redirect उसी पेज पर हो
+        $previousUrl = url()->previous();
 
-    // Parse URL path
-    $parsedUrl = parse_url($previousUrl, PHP_URL_PATH);
+        // URL से old locale remove करके new locale add करना होगा
 
-    // वर्तमान URL path से पहले से मौजूद language code हटाएं (e.g. /en/ या /hi/)
-    $segments = explode('/', ltrim($parsedUrl, '/'));
+        // Parse URL path
+        $parsedUrl = parse_url($previousUrl, PHP_URL_PATH);
 
-    if (in_array($segments[0], ['en', 'hi', 'es', 'fr'])) {
-        // पुरानी भाषा को हटा दें
-        array_shift($segments);
+        // वर्तमान URL path से पहले से मौजूद language code हटाएं (e.g. /en/ या /hi/)
+        $segments = explode('/', ltrim($parsedUrl, '/'));
+
+        if (in_array($segments[0], ['en', 'hi', 'es', 'fr'])) {
+            // पुरानी भाषा को हटा दें
+            array_shift($segments);
+        }
+
+        // नए language code के साथ URL बनाएं
+        $newUrl = url('/'.$lang.'/'.implode('/', $segments));
+
+        return redirect($newUrl);
     }
-
-    // नए language code के साथ URL बनाएं
-    $newUrl = url('/' . $lang . '/' . implode('/', $segments));
-
-    return redirect($newUrl);
-}
-
-    
-    
 }

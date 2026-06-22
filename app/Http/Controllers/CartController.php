@@ -2,16 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\Quote;
-use App\Models\Quote_item;
-use App\Models\Product;
 use App\Models\AttributeCombination;
 use App\Models\AttributeValue;
 use App\Models\Coupon;
+use App\Models\Product;
+use App\Models\Quote;
+use App\Models\Quote_item;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Session;
 
 class CartController extends Controller
 {
@@ -44,10 +43,11 @@ class CartController extends Controller
 
                             $pairs = [];
                             foreach ($attributeValues as $value) {
-                                $pairs[] = $value->attribute->name . ': ' . $value->value;
+                                $pairs[] = $value->attribute->name.': '.$value->value;
                             }
 
                             $option = implode(', ', $pairs);
+
                             return $option === $item->custom_option;
                         });
 
@@ -72,6 +72,7 @@ class CartController extends Controller
 
         return view('cart', compact('quote'));
     }
+
     public function store(Request $request)
     {
         $data = $request->validate([
@@ -96,7 +97,7 @@ class CartController extends Controller
 
             $pairs = [];
             foreach ($attributeValues as $value) {
-                $pairs[] = $value->attribute->name . ': ' . $value->value;
+                $pairs[] = $value->attribute->name.': '.$value->value;
             }
             $custom_option = implode(', ', $pairs);
 
@@ -147,17 +148,18 @@ class CartController extends Controller
             ]);
         }
 
-
         $subtotal = Quote_item::where('quote_id', $quote->id)->sum('row_total');
         $quote->update([
             'subtotal' => $subtotal,
             'total' => $subtotal,
         ]);
+
         return redirect()->back()->with('message', 'Item added to cart successfully.');
     }
+
     public function remove($id)
     {
-        $item = Quote_Item::findOrFail($id);
+        $item = Quote_item::findOrFail($id);
         $quote = $item->quote;
 
         $item->delete();
@@ -200,17 +202,17 @@ class CartController extends Controller
 
         $coupon = Coupon::where('coupon_code', $request->coupon)->first();
 
-        if (!$coupon || $coupon->status != 1) {
+        if (! $coupon || $coupon->status != 1) {
             return redirect()->back()->with('error', 'Invalid or inactive coupon.');
         }
 
         $now = now();
-        if (!$now->between($coupon->valid_from, $coupon->valid_to)) {
+        if (! $now->between($coupon->valid_from, $coupon->valid_to)) {
             return redirect()->back()->with('error', 'Coupon is not valid right now.');
         }
 
         $quote = Quote::find($request->quote_id);
-        if (!$quote) {
+        if (! $quote) {
             return redirect()->back()->with('warning', 'Cart not found.');
         }
 
@@ -224,15 +226,17 @@ class CartController extends Controller
                 'coupon' => $coupon->coupon_code,
                 'coupon_discount' => $coupon->coupon_discount,
             ]);
+
             return redirect()->back()->with('message', 'Coupon applied successfully!');
         }
 
         return redirect()->back()->with('warning', 'Coupon discount exceeds subtotal.');
     }
+
     public function update(Request $request, $id)
     {
         $request->validate([
-            'quantity' => 'required|integer|min:1'
+            'quantity' => 'required|integer|min:1',
         ]);
 
         $user = Auth::user();
@@ -242,20 +246,19 @@ class CartController extends Controller
             ->orWhere('cart_id', $cartId)
             ->first();
 
-        if (!$quote) {
+        if (! $quote) {
             return response()->json(['success' => false, 'error' => 'Cart not found.']);
         }
 
         $item = Quote_item::where('id', $id)->where('quote_id', $quote->id)->first();
 
-        if (!$item) {
+        if (! $item) {
             return response()->json(['success' => false, 'error' => 'Item not found in cart.']);
         }
 
         $item->qty = $request->quantity;
         $item->row_total = $request->quantity * $item->price;
         $item->save();
-
 
         $subtotal = Quote_item::where('quote_id', $quote->id)->sum('row_total');
         $quote->update([
@@ -265,7 +268,7 @@ class CartController extends Controller
 
         return response()->json([
             'success' => true,
-            'updated_total' => number_format($item->row_total, 2)
+            'updated_total' => number_format($item->row_total, 2),
         ]);
     }
 }
